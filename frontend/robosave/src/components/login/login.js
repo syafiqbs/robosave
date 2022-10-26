@@ -94,6 +94,8 @@ class Login extends React.Component {
           templateColumns='repeat(11, 1fr)'
           gap={4}
         >
+
+          {/* LEFT COLOUMN - LOGO COLUMN */}
           <GridItem colSpan={6} className={styles.main}>
             <Center>
               <Box m={40}>
@@ -104,6 +106,8 @@ class Login extends React.Component {
               </Box>
             </Center>
           </GridItem>
+
+          {/* RIGHT COLUMN - LOG IN COLUMN */}
           <GridItem colSpan={5}>
             <Box mx={20} mt={20}>
               <Text fontSize='3xl' fontWeight="semibold">Sign In</Text>
