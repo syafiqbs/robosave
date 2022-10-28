@@ -7,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 import requests, json
 from functions import url
+from sqlalchemy import extract  
+import re
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/transaction'
@@ -43,6 +45,22 @@ def get_all_transactions():
         {
             "status":"sucess",
             "transaction":[transaction.json() for transaction in transactionlist]
+        }
+    )
+
+# Get round up by customer_id and month
+@app.route("/transaction/<string:customer_id>/<string:month>")
+def get_round_by_month(customer_id, month):
+    roundup = db.session.query(db.func.sum(Transaction.value_roundup)).filter(extract('month', Transaction.transaction_date)==month).filter_by(customer_id=customer_id).all()
+    roundup = re.findall("\d+\.\d+", str(roundup))
+
+    return jsonify(
+        {
+            "status":"sucess",
+            "data":{
+                "roundup":round(float(roundup[0]),2),
+                "month":month
+            }
         }
     )
 
