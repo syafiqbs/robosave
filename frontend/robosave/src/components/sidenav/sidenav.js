@@ -93,7 +93,7 @@ class Sidenav extends React.Component {
                     // p={2}
                     // borderRadius={8}
                     w={this.state.smallNav === false && "100%"}
-                    href=''>
+                    href='/'>
                     <Flex>
                       <Flex flexDir="column">
                         <Text>Sign Out</Text>
