@@ -23,7 +23,7 @@ USE `transaction`;
 
 DROP TABLE IF EXISTS `transaction`;
 CREATE TABLE IF NOT EXISTS `transaction` (
-  `transaction_id` int NOT NULL,
+  `transaction_id` int AUTO_INCREMENT NOT NULL,
   `transaction_date` datetime NOT NULL,
   `customer_id` integer NOT NULL,
   `value_before` float NOT NULL,
