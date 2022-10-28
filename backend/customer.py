@@ -1,10 +1,15 @@
 import ctypes
 import json
 import traceback
-from flask import Flask, request, jsonify
+from venv import create
+from flask import Flask, request, jsonify, url_for
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
+import requests, json
+from functions import url
+from getCustomerTypes import getCustomerTypes
+from getProductTypes import getProductTypes
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/customer'
@@ -39,7 +44,7 @@ def get_all_customers():
     )
 
 @app.route("/customer/<int:customer_id>") #GET request to get a specific customer
-def get_customers(customer_id):
+def get_customer(customer_id):
     customer = Customer.query.filter_by(customer_id = customer_id).first()
     return jsonify(
         {
@@ -94,6 +99,91 @@ def delete_customer(customer_id):
         return jsonify({
             "message" : "Customer not found!"
         }), 500
+
+@app.route("/customerdetails") #GET request to retrieve customer details
+def getCustomerDetails():
+    #Header
+    data = request.get_json()
+    serviceName = 'getCustomerDetails'
+    userID = data['userID']
+    PIN = data['PIN']
+    OTP = data['OTP']
+    headerObj = {
+        'Header': {
+        'serviceName': serviceName,
+        'userID': userID,
+        'PIN': PIN,
+        'OTP': OTP
+        }
+    }
+    final_url="{0}?Header={1}".format(url(),json.dumps(headerObj))
+    response = requests.post(final_url)
+    serviceRespHeader = response.json()['Content']['ServiceResponse']['ServiceRespHeader']
+    errorCode = serviceRespHeader['GlobalErrorID']
+    if errorCode == '010000':
+        CDMCustomer = response.json()['Content']['ServiceResponse']['CDMCustomer']
+        return CDMCustomer
+    elif errorCode == '010041':
+        return "OTP has expired.\nYou will receiving a SMS"
+    else:
+        return serviceRespHeader['ErrorText']
+
+@app.route("/customeraccount") # GET request to returns customer accounts
+def getCustomerAccounts():
+    #Header
+    data = request.get_json()
+    serviceName = 'getCustomerAccounts'
+    userID = data['userID']
+    PIN = data['PIN']
+    OTP = data['OTP']
+    headerObj = {
+                        'Header': {
+                        'serviceName': serviceName,
+                        'userID': userID,
+                        'PIN': PIN,
+                        'OTP':OTP
+                        }
+                        }
+    final_url="{0}?Header={1}".format(url(),json.dumps(headerObj))
+    response = requests.post(final_url)
+    serviceRespHeader = response.json()['Content']['ServiceResponse']['ServiceRespHeader']
+    errorCode = serviceRespHeader['GlobalErrorID']
+    if errorCode == '010000':
+        acc_list = response.json()['Content']['ServiceResponse']['AccountList']
+        if acc_list == {}:
+            return "No record found!"
+        else:
+            return acc_list
+    elif errorCode == '010041':
+        return "OTP has expired.\nYou will receiving a SMS"
+    else:
+        return serviceRespHeader['ErrorText']
+
+@app.route("/test")
+def checkifexists (): 
+    data = request.get_json
+    userID = data['userID']
+    if (get_customer(userID)): # checks if customer has robosave account
+        customerDetails = requests.get(url_for("getCustomerDetails", _external = True), json = data)
+        customerAccounts = requests.get(url_for("getCustomerAccounts", _external = True), json = data)
+        return jsonify ({
+            "customerDetails" : customerDetails,
+            "customerAccounts" : customerAccounts
+        })
+    else:
+        isCreated = requests.post(url_for("create_customer", _external = True), json = data) # creates robosave account for customer
+        if (isCreated):
+            customerDetails = requests.get(url_for("getCustomerDetails", _external = True), json = data)
+            customerAccounts = requests.get(url_for("getCustomerAccounts", _external = True), json = data)
+            return jsonify ({
+                "customerDetails" : customerDetails,
+                "customerAccounts" : customerAccounts
+            })
+        else : 
+            return jsonify ({
+                "message" : "WRONG"
+            })
+        
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
