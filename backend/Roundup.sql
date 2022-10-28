@@ -23,10 +23,10 @@ USE `roundup`;
 
 DROP TABLE IF EXISTS `roundup`;
 CREATE TABLE IF NOT EXISTS `roundup` (
-  `roundup_date` datetime NOT NULL,
+  `roundup_date` varchar(64) NOT NULL,
   `customer_id` int NOT NULL,
   `total` float NOT NULL,
-  PRIMARY KEY (`roundup_date`, `customer_id`)
+  PRIMARY KEY (`customer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
