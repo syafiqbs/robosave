@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS `roundup` (
 --
 
 INSERT INTO `roundup` (`roundup_date`,`customer_id`, `total`) VALUES
-("2021-12-12 15:00:00", 0, 0.5),
-("2021-12-24 15:00:00", 0, 0.9);
+("2021-12-12 15:00:00", 0, 0.5);
 ;
 COMMIT;
