@@ -28,7 +28,7 @@ class Transaction(db.Model):
         self.value_roundup = value_roundup
     
     def json(self):
-        return {"transaction_id":self.transaction_id, "customer_id":self.customer_id, "value_before":self.value_before, "value_after":self.value_after, "value_roundup":self.value_roundup}
+        return {"transaction_id":self.transaction_id, "transaction_date":self.transaction_date, "customer_id":self.customer_id, "value_before":self.value_before, "value_after":self.value_after, "value_roundup":self.value_roundup}
     
     
 @app.route("/getAllTransactions")
