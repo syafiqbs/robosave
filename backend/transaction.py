@@ -5,6 +5,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
+import requests, json
+from functions import url
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/transaction'
@@ -75,6 +77,65 @@ def insert_transaction():
             "status": "failure",
             "message": "An error occurred creating the transaction."
         }), 500
+
+# Call tBank billPayment API, OTP is set to '99999' to bypass
+# POST request example
+# {
+#     "userID":"stablekwon",
+#     "PIN":"000000",
+#     "accountFrom":"9248",
+#     "accountTo":"9253",
+#     "transactionAmount":"0.5",
+#     "transactionReferenceNumber":"NA",
+#     "narrative":"Test"
+# }
+@app.route("/sendBillPayment", methods=["POST"])
+def billPayment():
+    data = request.get_json()
+    userID = data['userID']
+    PIN = data['PIN']
+    accountFrom = data['accountFrom']
+    accountTo = data['accountTo']
+    transactionAmount = data['transactionAmount']
+    transactionReferenceNumber = data['transactionReferenceNumber']
+    narrative = data['narrative']
+
+    #Content
+    headerObj = {
+        'Header': {
+            'serviceName': 'billPayment',
+            'userID': userID,
+            'PIN': PIN,
+            'OTP':'999999'
+        }
+    }
+    contentObj = {
+        'Content': {
+            'accountFrom': accountFrom,
+            'accountTo': accountTo,
+            'transactionAmount': transactionAmount,
+            'transactionReferenceNumber': transactionReferenceNumber ,
+            'narrative': narrative
+        }
+    }
+    
+    final_url="{0}?Header={1}&Content={2}".format(url(),json.dumps(headerObj),json.dumps(contentObj))
+    response = requests.post(final_url)
+    serviceRespHeader = response.json()['Content']['ServiceResponse']['ServiceRespHeader']
+    errorCode = serviceRespHeader['GlobalErrorID']
+    
+    if errorCode == '010000':
+        ServerResponse = response.json()['Content']['ServiceResponse']
+        print("Balance After Transferring: ${:.2f} ".format(float(ServerResponse['BalanceAfter']['_content_'])))
+        print("Transaction ID: ", ServerResponse['TransactionID']['_content_'])
+        print("Balance Before Transferring: ${:.2f}".format( float(ServerResponse['BalanceBefore']['_content_'])))
+        return ("Transaction success")
+        
+
+    elif errorCode == '010041':
+        return("OTP has expired.\nYou will receiving a SMS")
+    else:
+        return(serviceRespHeader['ErrorText'])
     
 if __name__ == '__main__':
     app.run(port=5100, debug=True)
