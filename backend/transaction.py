@@ -1,3 +1,6 @@
+import ctypes
+import json
+import traceback
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -30,7 +33,7 @@ class Transaction(db.Model):
     def json(self):
         return {"transaction_id":self.transaction_id, "transaction_date":self.transaction_date, "customer_id":self.customer_id, "value_before":self.value_before, "value_after":self.value_after, "value_roundup":self.value_roundup}
     
-    
+# Get all transactions
 @app.route("/getAllTransactions")
 def get_all_transactions():
     transactionlist = Transaction.query.all()
@@ -41,5 +44,37 @@ def get_all_transactions():
         }
     )
 
+# Insert a transaction for a customer
+@app.route("/transaction", methods=["POST"])
+def insert_transaction():
+    data = request.get_json()
+
+    transaction_id = data['transaction_id']
+    transaction_date = data['transaction_date']
+    customer_id = data['customer_id']
+    value_before = data['value_before']
+    value_after = data['value_after']
+    value_roundup = data['value_roundup']
+
+    transaction = Transaction(transaction_id=transaction_id, transaction_date=transaction_date, customer_id=customer_id, value_before=value_before, value_after=value_after, value_roundup=value_roundup)
+
+    try:
+        db.session.add(transaction)
+        db.session.commit()
+        return jsonify(
+            {
+                "status": "success",
+                "data": transaction.json()
+            }
+        ), 201
+    except Exception as e:
+        print('failure', e)
+
+        return jsonify(
+        {
+            "status": "failure",
+            "message": "An error occurred creating the transaction."
+        }), 500
+    
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5100, debug=True)
