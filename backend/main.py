@@ -1,7 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship
+from sqlalchemy import extract  
+import re
+import requests, json
+from functions import url
+
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/robosave'
@@ -42,7 +47,7 @@ class Transaction(db.Model):
         self.value_roundup = value_roundup
     
     def json(self):
-        return {"transaction_id":self.transaction_id, "customer_id":self.customer_id, "value_before":self.value_before, "value_after":self.value_after, "value_roundup":self.value_roundup}
+        return {"transaction_id":self.transaction_id, "txn_date":self.txn_date, "customer_id":self.customer_id, "value_before":self.value_before, "value_after":self.value_after, "value_roundup":self.value_roundup}
 
 class Roundup(db.Model):
     __table__name = "roundup"
@@ -58,6 +63,7 @@ class Roundup(db.Model):
     def json(self):
         return {"roundup_date":self.roundup_date, "customer_id":self.customer_id, "total":self.total}
 
+## Get all customers
 @app.route("/customer")
 def get_all_customer():
     customerlist = Customer.query.all()
@@ -67,6 +73,79 @@ def get_all_customer():
             "customer":[customer.json() for customer in customerlist]
         }
     )
+
+# Insert a transaction for a customer
+@app.route("/transaction", methods=["POST"])
+def insert_transaction():
+    data = request.get_json()
+
+    transaction_id = data['transaction_id']
+    txn_date = data['txn_date']
+    customer_id = data['customer_id']
+    value_before = data['value_before']
+    value_after = data['value_after']
+    value_roundup = data['value_roundup']
+
+    transaction = Transaction(transaction_id=transaction_id, txn_date=txn_date, customer_id=customer_id, value_before=value_before, value_after=value_after, value_roundup=value_roundup)
+
+    try:
+        db.session.add(transaction)
+        db.session.commit()
+    except Exception as e:
+        print('failure', e)
+
+        return jsonify(
+        {
+            "status": "failure",
+            "message": "An error occurred creating the transaction."
+        }), 500
+
+# Get round up by month
+@app.route("/roundup/<string:customer_id>/<string:month>")
+def get_round_by_month(customer_id, month):
+
+    roundup = db.session.query(db.func.sum(Transaction.value_roundup)).filter(extract('month', Transaction.txn_date)==month).filter_by(customer_id=customer_id).all()
+    roundup = re.findall("\d+\.\d+", str(roundup))
+
+    return jsonify(
+        {
+            "status":"sucess",
+            "roundup":roundup
+        }
+    )
+
+@app.route("/OTP", methods=["POST"])
+def requestOTP():
+   data = request.get_json() 
+   userID = data['userID']
+   pin = data['pin']
+   
+   headerObj = {
+    'Header': {
+        'serviceName': 'requestOTP',
+        'userID': userID,
+        'PIN': pin,
+        }
+
+    }
+   final_url="{0}?Header={1}".format(url(),json.dumps(headerObj))
+   response = requests.post(final_url)
+   serviceRespHeader = response.json()['Content']['ServiceResponse']['ServiceRespHeader']
+   errorCode = serviceRespHeader['GlobalErrorID']
+
+   if errorCode == '010000':
+    dic = {0:'01000', 1:'OTP Sent'}
+    return dic
+   elif errorCode == '010041':
+    dic = {0:'010041', 1:'OTP has expired.\nYou will receiving a SMS'}
+    return dic
+   else:
+    dic = {0: errorCode, 1:serviceRespHeader['ErrorDetails']}
+    return dic
+    
+
+
+
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
