@@ -4,6 +4,7 @@ import React from "react";
 
 // Components
 import Sidenav from "../sidenav/sidenav";
+import OTPModal from "../OTPModal/OTPModal";
 
 // Chakra UI imports
 import {
@@ -15,16 +16,7 @@ import {
   Input,
   Grid,
   GridItem,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Lorem,
 } from "@chakra-ui/react";
-import OTPModal from "../OTPModal/OTPModal";
 
 class Dashboard extends React.Component {
   state = {

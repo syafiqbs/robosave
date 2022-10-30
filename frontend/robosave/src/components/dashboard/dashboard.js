@@ -8,6 +8,7 @@ import Sidenav from '../sidenav/sidenav';
 // Chakra UI imports
 import { Flex, Text, Button, Table, Thead,Tbody,Tfoot,Tr,Th,Td,TableCaption,TableContainer,   Stat,StatLabel,StatNumber,StatHelpText,StatArrow,StatGroup, } from '@chakra-ui/react'
 import {  } from '@chakra-ui/icons'
+import { Link } from 'react-router-dom';
 
 
 
@@ -33,9 +34,12 @@ class Dashboard extends React.Component {
               pt={10}
               >
               <Button
+              as={Link}
               color="white" 
               bg="black"
-              _hover={{boxShadow: "2px 2px 5px #68D391;"}}>
+              _hover={{boxShadow: "2px 2px 5px #68D391;"}}
+              to="/payment"
+              >
               Make Payment
               </Button>
             </Flex>

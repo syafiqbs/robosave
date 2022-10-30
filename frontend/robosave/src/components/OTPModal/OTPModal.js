@@ -13,7 +13,6 @@ import {
   Input,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import SuccessModal from "../SuccessModal/SuccessModal";
 
 export default function OTPModal() {
   const [otp, setOTP] = useState("")
@@ -78,7 +77,10 @@ export default function OTPModal() {
           <ModalOverlay />
           <ModalContent mt={"60"}>
             <ModalHeader textAlign={"center"}>Payment Sucessful!</ModalHeader>
-            <ModalCloseButton onClick={onFirstModalClose} />
+            <ModalCloseButton onClick={() => {
+              onFirstModalClose()
+              window.location.href = '/dashboard'
+            }} />
           </ModalContent>
         </Modal>
       </>
