@@ -18,20 +18,33 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 
+
 class Dashboard extends React.Component {
   state = {
     amount: "",
     description: "",
-    amountTo: "",
+    accountTo: "",
     pin: "",
   };
 
   render() {
     const handleChange = (event, fieldName) => {
-      this.state[fieldName] = event.target.value;
+      this.setState((prevState) => ({
+        ...prevState,
+        [fieldName]: event.target.value,
+      }));
 
       console.log("value is:", event.target.value);
+      console.log(this.state);
     };
+
+    const checkValidForm = () => {
+      const { amount, accountTo, pin } = this.state;
+      console.log(this.state, "state");
+      return amount > 0 && accountTo.length > 0 && pin.length > 0;
+    };
+
+
     return (
       <Flex>
         {/* SIDENAV */}
@@ -39,7 +52,7 @@ class Dashboard extends React.Component {
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex flexDir="column" ml={10} mt={10}>
-          {/* Savings */}
+          {/* Payment Info */}
           <Flex
             flexDir="column"
             mb={5}
@@ -52,10 +65,12 @@ class Dashboard extends React.Component {
             <Text fontSize="3xl" fontWeight="bold" align="center" mb={10}>
               Payment Info
             </Text>
+
+            {/* Form Grid */}
             <Grid gap={6} templateColumns="repeat(2, 1fr)">
               <GridItem>
-                <FormControl>
-                  <FormLabel>Amount*</FormLabel>
+                <FormControl isRequired>
+                  <FormLabel>Amount</FormLabel>
                   <Input
                     bg="white"
                     type="number"
@@ -76,8 +91,8 @@ class Dashboard extends React.Component {
               </GridItem>
 
               <GridItem>
-                <FormControl>
-                  <FormLabel>Account to*</FormLabel>
+                <FormControl isRequired>
+                  <FormLabel>Account to</FormLabel>
                   <Input
                     bg="white"
                     type="text"
@@ -87,8 +102,8 @@ class Dashboard extends React.Component {
               </GridItem>
 
               <GridItem>
-                <FormControl>
-                  <FormLabel>PIN*</FormLabel>
+                <FormControl isRequired>
+                  <FormLabel>PIN</FormLabel>
                   <Input
                     bg="white"
                     type="number"
@@ -101,8 +116,12 @@ class Dashboard extends React.Component {
                 <Button colorScheme="red">Cancel</Button>
               </GridItem>
 
+              {/* Submit / OTP Modal */}
               <GridItem>
-                <OTPModal paymentState={this.state} />
+                <OTPModal
+                  paymentState={this.state}
+                  checkValidForm={checkValidForm}
+                />
               </GridItem>
             </Grid>
           </Flex>
