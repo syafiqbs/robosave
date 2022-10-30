@@ -90,7 +90,7 @@ class Login extends React.Component {
     return (
       <div className={styles.body}>
         <Grid
-          h='800px'
+          h='100vh'
           templateColumns='repeat(11, 1fr)'
           gap={4}
         >
