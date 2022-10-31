@@ -22,7 +22,7 @@ class Dashboard extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav/>
+        <Sidenav dashboardLink="#"/>
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex
