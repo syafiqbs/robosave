@@ -92,13 +92,12 @@ class Login extends React.Component {
             userID: this.state.username,
             pin: this.state.pin,
           })
-  };
-  console.log(requestOptions)
+    };
+    // console.log(requestOptions)
     fetch('http://127.0.0.1:5000/OTP', requestOptions)
         .then(response => response.json())
         .then(data => {
           this.setState({ postData: data })
-          console.log(data)
           if (data["0"] === "01000") {
             this.setState({OTPStatus: true})
           } else {
@@ -181,7 +180,7 @@ class Login extends React.Component {
         <Modal isOpen={this.state.isErrorOpen} onClose={this.onErrorClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Error Requesting OTP</ModalHeader>
+          <ModalHeader>Requesting OTP Failed</ModalHeader>
           <ModalCloseButton />
           <ModalBody> Please input correct username/PIN
           </ModalBody>
