@@ -3,13 +3,16 @@ import React from 'react';
 import styles from './login.module.css';
 
 // Chakra UI imports
-import { Center, Text, FormControl, FormLabel,Grid, GridItem, Input, Box, Button, } from '@chakra-ui/react'
+import { Center, Text, FormControl, FormLabel,Grid, GridItem, Input, Box, Button,  Modal,ModalOverlay,ModalContent,ModalHeader,ModalFooter,ModalBody,ModalCloseButton, } from '@chakra-ui/react'
 
 import blackLogo from "../../assets/black-logo.png";
 
 
 class Login extends React.Component {
   state = {
+    isOpen: false,
+    postData: "",
+    OTPStatus: false
   }
 
   handleChange = e => {
@@ -29,52 +32,79 @@ class Login extends React.Component {
     console.log(e.target.name, e.target.value)
   }
   
-  handleRequestOTP = event => {
-    event.preventDefault();
-    const username = this.state.username
-    const pin = this.state.pin
-    // console.log(username, pin)
-    // REQUEST OTP CALL
-    const ApiURL = "http://tbankonline.com/SMUtBank_API/Gateway"
-    const headerObj = {
-      Header: {
-        serviceName: "requestOTP",
-        userID: username,
-        PIN: pin
-      }
-    }
+  onErrorOpen = () => this.setState({ isErrorOpen: true })
+  onErrorClose = () => this.setState({ isErrorOpen: false})
 
-    var header = JSON.stringify(headerObj);
-    var xmlHttp = new XMLHttpRequest();
-    if (xmlHttp === null) {
-      alert("Browser does not support HTTP request.");
-      return;
-    }
-    console.log(ApiURL+"?Header="+header)
-    xmlHttp.open("GET", ApiURL+"?Header="+header, true);
-    xmlHttp.timeout = 5000
+  // handleRequestOTP = event => {
+  //   event.preventDefault();
+  //   const username = this.state.username
+  //   const pin = this.state.pin
+  //   // console.log(username, pin)
+  //   // REQUEST OTP CALL
+  //   const ApiURL = "http://tbankonline.com/SMUtBank_API/Gateway"
+  //   const headerObj = {
+  //     Header: {
+  //       serviceName: "requestOTP",
+  //       userID: username,
+  //       PIN: pin
+  //     }
+  //   }
 
-    // setup http event handlers
-    xmlHttp.onreadystatechange = function() {
-      if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-          let responseObj = JSON.parse(xmlHttp.responseText);
-          let serviceRespHeader = responseObj.Content.ServiceResponse.ServiceRespHeader;
-          let globalErrorID = serviceRespHeader.GlobalErrorID;
-          if (globalErrorID === "010041"){
-              return;
-          }
-          else if (globalErrorID !== "010000"){
-              alert(serviceRespHeader.ErrorDetails);
-              return;
-          }
+  //   var header = JSON.stringify(headerObj);
+  //   var xmlHttp = new XMLHttpRequest();
+  //   if (xmlHttp === null) {
+  //     alert("Browser does not support HTTP request.");
+  //     return;
+  //   }
+  //   console.log(ApiURL+"?Header="+header)
+  //   xmlHttp.open("GET", ApiURL+"?Header="+header, true);
+  //   xmlHttp.timeout = 5000
+
+  //   // setup http event handlers
+  //   xmlHttp.onreadystatechange = function() {
+  //     if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+  //         let responseObj = JSON.parse(xmlHttp.responseText);
+  //         let serviceRespHeader = responseObj.Content.ServiceResponse.ServiceRespHeader;
+  //         let globalErrorID = serviceRespHeader.GlobalErrorID;
+  //         if (globalErrorID === "010041"){
+  //             return;
+  //         }
+  //         else if (globalErrorID !== "010000"){
+  //             alert(serviceRespHeader.ErrorDetails);
+  //             return;
+  //         }
           
-          // display data
-          document.getElementById("requestOTPButton").innerHTML = "OTP Sent";
-      }
-  };			
+  //         // display data
+  //         document.getElementById("requestOTPButton").innerHTML = "OTP Sent";
+  //     }
+  // };			
 
-  // send the http request
-  xmlHttp.send();
+  // // send the http request
+  // xmlHttp.send();
+  // }
+
+  handleRequestOTP = event => {
+    event.preventDefault()
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+            userID: this.state.username,
+            pin: this.state.pin,
+          })
+  };
+  console.log(requestOptions)
+    fetch('http://127.0.0.1:5000/OTP', requestOptions)
+        .then(response => response.json())
+        .then(data => {
+          this.setState({ postData: data })
+          console.log(data)
+          if (data["0"] === "01000") {
+            this.setState({OTPStatus: true})
+          } else {
+              this.onErrorOpen()
+          }
+        })
   }
 
   handleSignIn = event => {
@@ -123,7 +153,7 @@ class Login extends React.Component {
                 <Input mb={5} type='password' id="pin" placeholder='6 Digit PIN' name="pin" onChange={(e) => {
                 this.handleChange(e)
               }}/>
-                <Button colorScheme='green' id="requestOTPButton" mt={5} variant='solid' w="100%" bg='green.400' type="submit">
+                <Button colorScheme='green' id="requestOTPButton" mt={5} variant='solid' w="100%" bg='green.400' type="submit" isLoading={this.state.OTPStatus} loadingText='OTP Sending'>
                   Request OTP
                 </Button>
               </FormControl>
@@ -147,6 +177,22 @@ class Login extends React.Component {
           </GridItem>
         </Grid>
 
+      {/* Error Modal */}
+        <Modal isOpen={this.state.isErrorOpen} onClose={this.onErrorClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Error Requesting OTP</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody> Please input correct username/PIN
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme='blue' mr={3} onClick={this.onErrorClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       </div>
     )
   }
