@@ -23,7 +23,7 @@ USE `customer`;
 
 DROP TABLE IF EXISTS `customer`;
 CREATE TABLE IF NOT EXISTS `customer` (
-  `customer_id` int NOT NULL,
+  `customer_id` varchar(64) NOT NULL,
   `customer_name` varchar(64) NOT NULL,
   `customer_bankNo` integer NOT NULL,
   PRIMARY KEY (`customer_id`)
@@ -34,6 +34,6 @@ CREATE TABLE IF NOT EXISTS `customer` (
 --
 
 INSERT INTO `customer` (`customer_id`,`customer_name`, `customer_bankNo`) VALUES
-(0, "John", 1111);
+("ABC123", "John", 1111);
 ;
 COMMIT;
