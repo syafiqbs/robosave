@@ -8,7 +8,7 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+08:00";
-
+ SET GLOBAL event_scheduler = "ON";
 --
 -- Database: `roundup`
 --
@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `roundup` (
   `roundup_date` varchar(64) NOT NULL,
   `customer_id` int NOT NULL,
   `total` float NOT NULL,
+  `monthly_total`float NOT NULL,
   PRIMARY KEY (`customer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -33,7 +34,15 @@ CREATE TABLE IF NOT EXISTS `roundup` (
 -- Dumping data for table `roundup`
 --
 
-INSERT INTO `roundup` (`roundup_date`,`customer_id`, `total`) VALUES
-("2021-12-12 15:00:00", 0, 0.5);
+INSERT INTO `roundup` (`roundup_date`,`customer_id`, `total`, `monthly_total`) VALUES
+("2021-12-12 15:00:00", 0, 0.5, 0.0);
 ;
+
+CREATE EVENT reset_monthly_total ON SCHEDULE 
+       EVERY 1 MONTH
+       STARTS '2022-05-01 00:00:00'
+       ON COMPLETION PRESERVE ENABLE
+    DO
+      update roundup set monthly_total=0.0;
+
 COMMIT;
