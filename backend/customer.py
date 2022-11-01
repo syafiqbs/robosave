@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import ctypes
 import json
 import traceback
@@ -43,15 +44,18 @@ def get_all_customers():
         }
     )
 
-@app.route("/customer/<int:customer_id>") #GET request to get a specific customer
+@app.route("/customer/<string:customer_id>") #GET request to get a specific customer
 def get_customer(customer_id):
     customer = Customer.query.filter_by(customer_id = customer_id).first()
-    return jsonify(
-        {
-            "status":"success",
-            "customer": customer.json()
-        }
-    )
+    try :
+        return jsonify(
+            {
+                "status":"success",
+                "customer": customer.json()
+            }
+        )
+    except Exception:
+        return NULL
 
 @app.route("/customer", methods = ["POST"]) #POST request to create new customer 
 def create_customer():
@@ -61,15 +65,14 @@ def create_customer():
         db.session.add(newCustomer)
         db.session.commit()
         return jsonify({
-            "message": "success",
-            "data" : newCustomer.json()
+            "message": "success"
         }), 201
     except Exception:
         return jsonify({
             "message": "Unable to commit to database."
         }), 500
 
-@app.route("/customer/update/<int:customer_id>", methods=['PUT']) # UPDATE of existing customer!
+@app.route("/customer/update/<string:customer_id>", methods=['PUT']) # UPDATE of existing customer!
 def update_customer(customer_id):
     data = request.get_json()
     customer_to_update = Customer.query.filter_by(customer_id = customer_id).first()
@@ -86,7 +89,7 @@ def update_customer(customer_id):
             "message" : "Customer not found! You screwed up big time!"
         }), 500
 
-@app.route("/customer/delete/<int:customer_id>", methods=['DELETE']) # DELETE existing customer!
+@app.route("/customer/delete/<string:customer_id>", methods=['DELETE']) # DELETE existing customer!
 def delete_customer(customer_id):
     customer_to_delete = Customer.query.filter_by(customer_id = customer_id).first()
     
@@ -159,25 +162,28 @@ def getCustomerAccounts():
     else:
         return serviceRespHeader['ErrorText']
 
-@app.route("/test")
-def checkifexists (): 
-    data = request.get_json
+@app.route("/checkExisting")
+def checkifexists(): 
+    data = request.get_json()
     userID = data['userID']
+    customerDetails = requests.get(url_for("getCustomerDetails", _external = True), json = data)
+    customerAccounts = requests.get(url_for("getCustomerAccounts", _external = True), json = data)
+    customerName = customerDetails.json()['givenName']
+    customerBankNo = customerAccounts.json()['account'][0]['accountID']
     if (get_customer(userID)): # checks if customer has robosave account
-        customerDetails = requests.get(url_for("getCustomerDetails", _external = True), json = data)
-        customerAccounts = requests.get(url_for("getCustomerAccounts", _external = True), json = data)
-        return jsonify ({
-            "customerDetails" : customerDetails,
-            "customerAccounts" : customerAccounts
-        })
+        return {
+            "customerDetails" : customerDetails.json(),
+            "customerAccounts" : customerAccounts.json(),
+            'message' : "Existing account"
+        }
     else:
+        data = {'customer_id': userID, 'customer_name' : customerName, 'customer_bankNo' : customerBankNo}
         isCreated = requests.post(url_for("create_customer", _external = True), json = data) # creates robosave account for customer
         if (isCreated):
-            customerDetails = requests.get(url_for("getCustomerDetails", _external = True), json = data)
-            customerAccounts = requests.get(url_for("getCustomerAccounts", _external = True), json = data)
             return jsonify ({
-                "customerDetails" : customerDetails,
-                "customerAccounts" : customerAccounts
+                "customerDetails" : customerDetails.json(),
+                "customerAccounts" : customerAccounts.json(),
+                "message" : "Account has been created."
             })
         else : 
             return jsonify ({
