@@ -8,37 +8,48 @@ import json
 import traceback
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/roundup'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/roundup'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 CORS(app)
+
 
 class Roundup(db.Model):
     __table__name = "roundup"
     roundup_date = db.Column(db.DateTime, primary_key=True)
     customer_id = db.Column(db.Integer, primary_key=True)
     total = db.Column(db.Float, nullable=False)
-    
-    def __init__(self, roundup_date, customer_id, total ):
+    monthly_total = db.Column(db.Float, nullable=False)
+
+    def __init__(self, roundup_date, customer_id, total, monthly_total):
         self.roundup_date = roundup_date
         self.customer_id = customer_id
         self.total = total
-    
+        self.monthly_total = monthly_total
+
     def json(self):
-        return {"roundup_date":self.roundup_date, "customer_id":self.customer_id, "total":self.total}
-    
-    
+        return {"roundup_date": self.roundup_date, "customer_id": self.customer_id, "total": self.total, "monthly_total": self.monthly_total}
+
+
 @app.route("/getAllRoundups")
 def get_all_roundups():
     rounduplist = Roundup.query.all()
+    if rounduplist:
+        return jsonify(
+            {
+                "status": "sucess",
+                "roundup": [roundup.json() for roundup in rounduplist]
+            }
+        )
     return jsonify(
         {
-            "status":"sucess",
-            "roundup":[roundup.json() for roundup in rounduplist]
+            "code": 404,
+            "message": "Roundup cannot be found."
         }
-    )
-    
+    ), 404
+
+
 @app.route("/getRoundupById/<int:customer_id>")
 def get_roundups_by_id(customer_id):
     roundup = Roundup.query.filter_by(customer_id=customer_id).first()
@@ -56,6 +67,7 @@ def get_roundups_by_id(customer_id):
         }
     ), 404
 
+
 @app.route("/createRoundup", methods=['POST'])
 def create_roundup():
     data = request.get_json()
@@ -72,8 +84,9 @@ def create_roundup():
         ), 400
 
     total = 0.0
+    monthly_total = 0.0
     roundup_date = data['roundup_date']
-    roundup = Roundup(roundup_date, customer_id, total)
+    roundup = Roundup(roundup_date, customer_id, total, monthly_total)
 
     try:
         db.session.add(roundup)
@@ -95,7 +108,8 @@ def create_roundup():
             "data": roundup.json()
         }
     ), 201
-    
+
+
 @app.route("/updateRoundup/<int:customer_id>", methods=['PUT'])
 def update_roundup(customer_id):
     roundup = Roundup.query.filter_by(customer_id=customer_id).first()
@@ -104,7 +118,8 @@ def update_roundup(customer_id):
         if data['roundup_date']:
             roundup.roundup_date = data['roundup_date']
         if data['roundup_value']:
-            roundup.total += data['roundup_value']     
+            roundup.total += data['roundup_value']
+            roundup.monthly_total += data['roundup_value']
         db.session.commit()
         return jsonify(
             {
@@ -121,7 +136,8 @@ def update_roundup(customer_id):
             "message": "Customer not found."
         }
     ), 404
-    
+
+
 @app.route("/deleteRoundup/<int:customer_id>", methods=['DELETE'])
 def delete_roundup(customer_id):
     roundup = Roundup.query.filter_by(customer_id=customer_id).first()
