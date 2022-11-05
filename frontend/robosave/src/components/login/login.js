@@ -111,9 +111,34 @@ class Login extends React.Component {
     const otp = this.state.otp
     console.log(otp)
     // REQUEST OTP CALL
-    
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+            userID: this.state.username,
+            PIN: this.state.pin,
+            OTP: this.state.otp
+          })
+    };
+    console.log(requestOptions)
+    fetch('http://127.0.0.1:5001/checkExisting', requestOptions)
+    .then(response => response.json())
+    .then(data => {
+      this.setState({ postData: data })
+      console.log(data)
+      console.log(data.message)
+      // stringify and set to session
+      sessionStorage.setItem("customerInformation", JSON.stringify(data));
+    })
   }
 
+  getSession() {
+    console.log("----------------------------------")
+    // call and parse it back to access it as a JSON object
+    const temp = JSON.parse(sessionStorage.getItem("customerInformation"))
+    console.log(temp.customerDetails.givenName)
+    console.log(temp.customerAccounts.account[0].accountID)
+  }
 
   render() {
     return (
@@ -173,6 +198,9 @@ class Login extends React.Component {
                 Go to dashboard (temp button)
               </Button>
             </a>
+              <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="button" onClick={this.getSession}>
+                Get session
+              </Button>
           </GridItem>
         </Grid>
 

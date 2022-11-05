@@ -162,7 +162,7 @@ def getCustomerAccounts():
     else:
         return serviceRespHeader['ErrorText']
 
-@app.route("/checkExisting")
+@app.route("/checkExisting", methods=["POST"])
 def checkifexists(): 
     data = request.get_json()
     userID = data['userID']
@@ -192,4 +192,4 @@ def checkifexists():
         
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5001, debug=True)
