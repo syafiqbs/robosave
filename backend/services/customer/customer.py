@@ -1,4 +1,4 @@
-from asyncio.windows_events import NULL
+
 import ctypes
 import json
 import traceback
@@ -11,9 +11,10 @@ import requests, json
 from functions import url
 from getCustomerTypes import getCustomerTypes
 from getProductTypes import getProductTypes
+from os import environ
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/customer'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -54,8 +55,8 @@ def get_customer(customer_id):
                 "customer": customer.json()
             }
         )
-    except Exception:
-        return NULL
+    except Exception as e:
+        return e
 
 @app.route("/customer", methods = ["POST"]) #POST request to create new customer 
 def create_customer():
@@ -192,4 +193,4 @@ def checkifexists():
         
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
