@@ -162,7 +162,7 @@ def invest():
 #billingorg
 @app.route("/billingorg", methods=["GET"])
 def billingorg():
-    result = getBillingOrganizations
+    result = getBillingOrganizations()
     return result
 
 if __name__ == '__main__':
