@@ -8,7 +8,7 @@ def sendSMS(userId, pin, otp, mobileNumber, message):
     PIN = pin
     OTP = otp
     #Content
-    mobileNumber = '6591443772'
+    mobileNumber = ''
     message = 'API Test'
     
     headerObj = {
