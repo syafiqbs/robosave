@@ -16,6 +16,7 @@ import {
   Input,
   Grid,
   GridItem,
+  Select
 } from "@chakra-ui/react";
 
 
@@ -24,15 +25,21 @@ class Dashboard extends React.Component {
     amount: "",
     description: "",
     accountTo: "",
+    accountFrom: "",
     pin: "",
-    cID: ""
+    cID: "",
+    bankAccounts: []
   };
 
   componentDidMount() {
     let params = new URLSearchParams(document.location.search);
     let cID = params.get("cID");
     if (cID) {this.setState({ cID: cID})}
-    console.log(cID)
+
+    const customerInformation = JSON.parse(sessionStorage.getItem("customerInformation"))
+    const bankAccounts = customerInformation.customerAccounts.account
+    this.setState({customerAccounts: customerInformation.customerAccounts, customerDetails: customerInformation.customerDetails, bankAccounts: bankAccounts})
+
   }
 
   render() {
@@ -42,8 +49,8 @@ class Dashboard extends React.Component {
         [fieldName]: event.target.value,
       }));
 
-      console.log("value is:", event.target.value);
-      console.log(this.state);
+      // console.log("value is:", event.target.value);
+      // console.log(this.state);
     };
 
     const checkValidForm = () => {
@@ -51,6 +58,32 @@ class Dashboard extends React.Component {
       console.log(this.state, "state");
       return amount > 0 && accountTo.length > 0 && pin.length > 0;
     };
+
+    const pay = () => {
+
+      const requestOptions = {
+        method: 'Post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userID: this.state.cID,
+          pin: this.state.pin,
+          otp: "999999",
+          accountFrom: this.state.accountFrom,
+          accountTo: this.state.accountTo,
+          transactionAmount: this.state.amount,
+          narrative: this.state.description
+        })
+        
+      };
+      console.log(requestOptions)
+
+      fetch(('http://127.0.0.1:5000/pay'), requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        this.setState({ postData: data })
+        // console.log(data)
+      });
+    }
 
 
     return (
@@ -69,7 +102,8 @@ class Dashboard extends React.Component {
             px={10}
             py={5}
             ml={"40"}
-            mt={"60"}>
+            // mt={"60"}
+            >
             <Text fontSize="3xl" fontWeight="bold" align="center" mb={10}>
               Payment Info
             </Text>
@@ -88,6 +122,17 @@ class Dashboard extends React.Component {
               </GridItem>
 
               <GridItem>
+                <FormControl isRequired>
+                  <FormLabel>Account to</FormLabel>
+                  <Input
+                    bg="white"
+                    type="text"
+                    onChange={(e) => handleChange(e, "accountTo")}
+                  />
+                </FormControl>
+              </GridItem>
+
+              <GridItem colSpan={2}>
                 <FormControl>
                   <FormLabel>Description</FormLabel>
                   <Input
@@ -97,15 +142,23 @@ class Dashboard extends React.Component {
                   />
                 </FormControl>
               </GridItem>
-
+              
               <GridItem>
                 <FormControl isRequired>
-                  <FormLabel>Account to</FormLabel>
-                  <Input
+                  <FormLabel>Account from</FormLabel>
+                  {/* <Input
                     bg="white"
-                    type="text"
-                    onChange={(e) => handleChange(e, "accountTo")}
-                  />
+                    type="number"
+                    onChange={(e) => handleChange(e, "accountFrom")}
+                  /> */}
+                  <Select 
+                  bg='white'
+                  placeholder='Select bank account' 
+                  onChange={(e) => handleChange(e, "accountFrom")}
+                  >
+                    {this.state.bankAccounts
+                    .map(account => <option key={account.accountID} value={account.accountID}>{account.accountID}</option>)}
+                  </Select>
                 </FormControl>
               </GridItem>
 
@@ -125,11 +178,15 @@ class Dashboard extends React.Component {
               </GridItem>
 
               {/* Submit / OTP Modal */}
-              <GridItem>
+              {/* <GridItem>
                 <OTPModal
                   paymentState={this.state}
                   checkValidForm={checkValidForm}
                 />
+              </GridItem> */}
+
+              <GridItem>
+                <Button colorScheme="green" onClick={pay}>Confirm</Button>
               </GridItem>
             </Grid>
           </Flex>

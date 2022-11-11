@@ -14,9 +14,9 @@ import math
 app = Flask(__name__)
 CORS(app)
 
-transaction_URL = environ.get('patientRecord_URL') or "http://localhost:5100/"
-roundup_URL = environ.get('drug_URL') or "http://localhost:5200/"
-customer_URL = environ.get('clinic_URL') or "http://localhost:5001/"
+transaction_URL = "http://localhost:5100/"
+roundup_URL = "http://localhost:5200/"
+customer_URL = "http://localhost:5001/"
 
 #Authentication
 @app.route("/OTP", methods=["POST"])
@@ -88,7 +88,7 @@ def processTransactionAdd(transactionRecord, transactionID):
     value_before = float(transactionRecord['transactionAmount'])
     value_after =math.ceil(float(transactionRecord['transactionAmount']))
     value_roundup = value_after - value_before
-    customer_id = 0
+    customer_id = transactionRecord["userID"]
     transactionJSON= json.dumps({'transaction_id': transactionID, 'transaction_date': date, 'customer_id':customer_id, 'value_before':value_before, 'value_after': value_after,  'value_roundup':value_roundup })
     record_result = invoke_http(transaction_URL+"transaction", method='POST', json=json.loads(transactionJSON))
     # print('record_result:', record_result)
