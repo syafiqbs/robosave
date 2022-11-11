@@ -128,7 +128,7 @@ def create_roundup():
     ), 201
 
 
-@app.route("/updateRoundup/<int:customer_id>/<string:roundup_date>", methods=['PUT'])
+@app.route("/updateRoundup/<string:customer_id>/<string:roundup_date>", methods=['PUT'])
 def update_roundup(customer_id, roundup_date):
     roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()
     if roundup:
