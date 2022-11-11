@@ -14,7 +14,7 @@ CORS(app)
 class Roundup(db.Model):
     __table__name = "roundup"
     roundup_date = db.Column(db.String(64), primary_key=True)
-    customer_id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.String(64), primary_key=True)
     total = db.Column(db.Float, nullable=False)
 
     def __init__(self, roundup_date, customer_id, total):
@@ -44,14 +44,14 @@ def get_all_roundups():
     ), 404
 
 
-@app.route("/getRoundupById/<int:customer_id>")
+@app.route("/getRoundupById/<string:customer_id>")
 def get_roundups_by_id(customer_id):
-    roundup = Roundup.query.filter_by(customer_id=customer_id).first()
-    if roundup:
+    rounduplist = Roundup.query.filter_by(customer_id=customer_id).all()
+    if rounduplist:
         return jsonify(
             {
                 "code": 200,
-                "data": roundup.json()
+                "data": [roundup.json() for roundup in rounduplist]
             }
         )
     return jsonify(
@@ -61,8 +61,7 @@ def get_roundups_by_id(customer_id):
         }
     ), 404
 
-
-@app.route("/getRoundupByMY/<int:customer_id>/<string:roundup_date>")
+@app.route("/getRoundupByMY/<string:customer_id>/<string:roundup_date>")
 def get_roundups_by_id_and_date(customer_id,roundup_date):
     roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()
     if roundup:
@@ -149,7 +148,7 @@ def update_roundup(customer_id, roundup_date):
     ), 404
 
 
-@app.route("/deleteRoundup/<int:customer_id>/<string:roundup_date>", methods=['DELETE'])
+@app.route("/deleteRoundup/<string:customer_id>/<string:roundup_date>", methods=['DELETE'])
 def delete_roundup(customer_id, roundup_date):
     roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()
     if roundup:
