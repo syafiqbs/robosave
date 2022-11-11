@@ -28,7 +28,8 @@ class Dashboard extends React.Component {
     accountFrom: "",
     pin: "",
     cID: "",
-    bankAccounts: []
+    bankAccounts: [],
+    organizations : []
   };
 
   componentDidMount() {
@@ -39,6 +40,17 @@ class Dashboard extends React.Component {
     const customerInformation = JSON.parse(sessionStorage.getItem("customerInformation"))
     const bankAccounts = customerInformation.customerAccounts.account
     this.setState({customerAccounts: customerInformation.customerAccounts, customerDetails: customerInformation.customerDetails, bankAccounts: bankAccounts})
+
+    fetch(('http://127.0.0.1:5000/billingorg'))
+      .then(response => response.json())
+      .then(data => {
+        let billingOrgs = []
+        for (const organization in data) {
+          billingOrgs.push({organization: organization, accountID: data[organization]})
+        }
+        
+        this.setState({organizations: billingOrgs})
+      });
 
   }
 
@@ -68,7 +80,7 @@ class Dashboard extends React.Component {
           userID: this.state.cID,
           pin: this.state.pin,
           otp: "999999",
-          accountFrom: this.state.accountFrom,
+          accountFrom: String(Number(this.state.accountFrom)),
           accountTo: this.state.accountTo,
           transactionAmount: this.state.amount,
           narrative: this.state.description
@@ -81,7 +93,8 @@ class Dashboard extends React.Component {
       .then(response => response.json())
       .then(data => {
         this.setState({ postData: data })
-        // console.log(data)
+        console.log(data)
+        // CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR
       });
     }
 
@@ -123,12 +136,15 @@ class Dashboard extends React.Component {
 
               <GridItem>
                 <FormControl isRequired>
-                  <FormLabel>Account to</FormLabel>
-                  <Input
-                    bg="white"
-                    type="text"
+                  <FormLabel>Billing Organization</FormLabel>
+                  <Select 
+                    bg='white'
+                    placeholder='Select bank account' 
                     onChange={(e) => handleChange(e, "accountTo")}
-                  />
+                  >
+                    {this.state.organizations
+                    .map(org => <option key={org.accountID} value={org.accountID}>{org.organization}</option>)}
+                  </Select>
                 </FormControl>
               </GridItem>
 
@@ -146,11 +162,6 @@ class Dashboard extends React.Component {
               <GridItem>
                 <FormControl isRequired>
                   <FormLabel>Account from</FormLabel>
-                  {/* <Input
-                    bg="white"
-                    type="number"
-                    onChange={(e) => handleChange(e, "accountFrom")}
-                  /> */}
                   <Select 
                   bg='white'
                   placeholder='Select bank account' 
