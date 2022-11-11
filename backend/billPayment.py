@@ -41,9 +41,12 @@ def billPayment(userId, pin, otp, accFrom, accTo, amt, refNo, msg):
         print("Balance After Transferring: ${:.2f} ".format(float(ServerResponse['BalanceAfter']['_content_'])))
         print("Transaction ID: ", ServerResponse['TransactionID']['_content_'])
         print("Balance Before Transferring: ${:.2f}".format( float(ServerResponse['BalanceBefore']['_content_'])))
+        return {0:200, 1:{'balanceAfter': float(ServerResponse['BalanceAfter']['_content_']), 'transactionID':ServerResponse['TransactionID']['_content_'] }, 'balanceBefore': float(ServerResponse['BalanceBefore']['_content_'])}
     elif errorCode == '010041':
         print("OTP has expired.\nYou will receiving a SMS")  
+        return {0:400, 1: 'OTP Expired'}
     else:
         print(serviceRespHeader['ErrorText'])
+        return {0:400, 1: serviceRespHeader['ErrorText'] }
 
 # billPayment('jingyi.yeo.2020', '123456', '639967', '9252', '9243', '50', '3123213', 'test')

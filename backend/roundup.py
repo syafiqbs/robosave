@@ -8,7 +8,7 @@ import json
 import traceback
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/roundup'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/roundup'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -165,4 +165,4 @@ def delete_roundup(customer_id):
 
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5200, debug=True)
