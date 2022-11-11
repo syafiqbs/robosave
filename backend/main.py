@@ -7,6 +7,7 @@ import os, sys
 from os import environ
 import json
 from billPayment import billPayment
+from placeMarketOrder import placeMarketOrder
 import datetime
 import math
 
@@ -15,7 +16,7 @@ CORS(app)
 
 transaction_URL = environ.get('patientRecord_URL') or "http://localhost:5100/"
 roundup_URL = environ.get('drug_URL') or "http://localhost:5200/"
-customer_URL = environ.get('clinic_URL') or "http://localhost:5001/customer/"
+customer_URL = environ.get('clinic_URL') or "http://localhost:5001/"
 
 #Authentication
 @app.route("/OTP", methods=["POST"])
@@ -48,18 +49,18 @@ def requestOTP():
     return dic
     
 
-#Process transaction
+#Process payment
 @app.route("/pay", methods=["POST"])
 def pay():
         # Simple check of input format and data of the request are JSON
     if request.is_json:
         try:
             transactionRecord = request.get_json()
-            print("\nReceived an patient record in JSON:", transactionRecord)
-            result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['transactionReferenceNumber'], transactionRecord['narrative'])
+            print("\nReceived a transaction record in JSON:", transactionRecord)
+            result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['narrative'])
+            print(result)
             if result[0]== 200:  
-                transResult=processTransactionAdd(transactionRecord)
-
+                transResult=processTransactionAdd(transactionRecord, result[1]['transactionID'])
             return transResult
 
         except Exception as e:
@@ -80,7 +81,7 @@ def pay():
         "message": "Invalid JSON input: " + str(request.get_data())
     }), 400
     
-def processTransactionAdd(transactionRecord):
+def processTransactionAdd(transactionRecord, transactionID):
     # Invoke the transaction microservice
     print('\n-----Invoking transaction microservice-----')
     date = str(datetime.datetime.now())
@@ -88,7 +89,7 @@ def processTransactionAdd(transactionRecord):
     value_after =math.ceil(float(transactionRecord['transactionAmount']))
     value_roundup = value_after - value_before
     customer_id = 0
-    transactionJSON= json.dumps({'transaction_id': transactionRecord['transactionReferenceNumber'], 'transaction_date': date, 'customer_id':customer_id, 'value_before':value_before, 'value_after': value_after,  'value_roundup':value_roundup })
+    transactionJSON= json.dumps({'transaction_id': transactionID, 'transaction_date': date, 'customer_id':customer_id, 'value_before':value_before, 'value_after': value_after,  'value_roundup':value_roundup })
     record_result = invoke_http(transaction_URL+"transaction", method='POST', json=json.loads(transactionJSON))
     # print('record_result:', record_result)
     transaction_stat = record_result['status']
@@ -121,7 +122,16 @@ def processTransactionAdd(transactionRecord):
         "roundup_result": roundup_result
     }
     }
-
+    
+#invest
+@app.route("/invest", methods=["GET"])
+def invest():
+    customer_id = 0
+    customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_id), method='GET')
+    print(customer_record)
+    if customer_record['status'] == 'success':
+        customer_bank = customer_record['customer']["customer_bankNo"]
+    return customer_record
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

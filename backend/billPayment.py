@@ -1,7 +1,7 @@
 import requests, json
 from functions import url
 
-def billPayment(userId, pin, otp, accFrom, accTo, amt, refNo, msg):
+def billPayment(userId, pin, otp, accFrom, accTo, amt, msg):
     #Header
     serviceName = 'billPayment'
     userID = userId
@@ -11,7 +11,7 @@ def billPayment(userId, pin, otp, accFrom, accTo, amt, refNo, msg):
     accountFrom = accFrom
     accountTo = accTo
     transactionAmount = amt
-    transactionReferenceNumber = refNo
+    transactionReferenceNumber = ''
     narrative = msg
     
     headerObj = {
