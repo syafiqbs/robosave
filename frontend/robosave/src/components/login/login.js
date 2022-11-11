@@ -129,6 +129,11 @@ class Login extends React.Component {
       console.log(data.message)
       // stringify and set to session
       sessionStorage.setItem("customerInformation", JSON.stringify(data));
+      if (data.message === "Existing account" || data.message === "Account has been created.") {
+        window.location.href = "/dashboard?aID=" + data.customerAccounts.account[0].accountID
+      } else {
+        this.onErrorOpen()
+      }
     })
   }
 
@@ -136,8 +141,14 @@ class Login extends React.Component {
     console.log("----------------------------------")
     // call and parse it back to access it as a JSON object
     const temp = JSON.parse(sessionStorage.getItem("customerInformation"))
-    console.log(temp.customerDetails.givenName)
+    console.log(temp.customerDetails)
     console.log(temp.customerAccounts.account[0].accountID)
+  }
+
+  clearSession() {
+    // console.log("----------------------------------")
+    // // call and parse it back to access it as a JSON object
+    sessionStorage.clear()
   }
 
   render() {
@@ -200,6 +211,9 @@ class Login extends React.Component {
             </a>
               <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="button" onClick={this.getSession}>
                 Get session
+              </Button>
+              <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="button" onClick={this.clearSession}>
+                Clear session
               </Button>
           </GridItem>
         </Grid>
