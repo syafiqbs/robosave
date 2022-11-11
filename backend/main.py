@@ -84,12 +84,13 @@ def pay():
 def processTransactionAdd(transactionRecord, transactionID):
     # Invoke the transaction microservice
     print('\n-----Invoking transaction microservice-----')
-    date = str(datetime.datetime.now())
+    date = datetime.datetime.now()
     value_before = float(transactionRecord['transactionAmount'])
     value_after =math.ceil(float(transactionRecord['transactionAmount']))
     value_roundup = value_after - value_before
-    customer_id = transactionRecord["userID"]
-    transactionJSON= json.dumps({'transaction_id': transactionID, 'transaction_date': date, 'customer_id':customer_id, 'value_before':value_before, 'value_after': value_after,  'value_roundup':value_roundup })
+    customer_id = transactionRecord['userID']
+    transactionJSON= json.dumps({'transaction_id': transactionID, 'transaction_date': str(date), 'customer_id':customer_id, 'value_before':value_before, 'value_after': value_after,  'value_roundup':value_roundup })
+
     record_result = invoke_http(transaction_URL+"transaction", method='POST', json=json.loads(transactionJSON))
     # print('record_result:', record_result)
     transaction_stat = record_result['status']
@@ -103,25 +104,47 @@ def processTransactionAdd(transactionRecord, transactionID):
         
     # Invoke the roundup microservice
     print('\n-----Invoking roundup microservice-----')
-    roundupJSON= json.dumps({'roundup_date': date, 'roundup_value': value_roundup })
-    roundup_result = invoke_http(roundup_URL+ "updateRoundup/"+ str(customer_id), method='PUT', json=json.loads(roundupJSON))
-    # print('roundup_result:', roundup_result)
-    roundup_stat = roundup_result['code']
-    if roundup_stat not in range(200,300):
-        # Return error
-        return {
-            "code": 500,
-            "data": {"roundup_result": roundup_result},
-            "message": "Roundup update failure."
-        }
     
-    return {
-    "code": 201,
-    "data": {
-        "record_result": record_result,
-        "roundup_result": roundup_result
-    }
-    }
+    roundup_month = date.strftime("%m-%Y")
+    roundupJSON= json.dumps({'roundup_date': roundup_month,'customer_id': customer_id, 'roundup_value': value_roundup })
+    roundup_result = invoke_http(roundup_URL+ "getRoundupByMY/"+ str(customer_id) +'/'+ str(roundup_month), method='GET')
+    # print('roundup_result:', roundup_result)
+    if roundup_result['code'] not in range(200,300):
+        roundup_create = invoke_http(roundup_URL+ "createRoundup", method='POST', json=json.loads(roundupJSON))
+        roundup_stat = roundup_create['code']
+        if roundup_stat not in range(200,300):
+            # Return error
+            return {
+                "code": 500,
+                "data": {"roundup_result": roundup_create},
+                "message": "Roundup update failure."
+            }
+        
+        return {
+        "code": 201,
+        "data": {
+            "record_result": record_result,
+            "roundup_result": roundup_create
+        }
+        }
+    else:
+        roundup_update = invoke_http(roundup_URL+ "updateRoundup/"+ str(customer_id) +'/'+ str(roundup_month), method='PUT', json=json.loads(roundupJSON))
+        roundup_stat = roundup_update['code']
+        if roundup_stat not in range(200,300):
+            # Return error
+            return {
+                "code": 500,
+                "data": {"roundup_result": roundup_update},
+                "message": "Roundup update failure."
+            }
+        
+        return {
+        "code": 201,
+        "data": {
+            "record_result": record_result,
+            "roundup_result": roundup_update
+        }
+        }
     
 #invest
 @app.route("/invest", methods=["GET"])
