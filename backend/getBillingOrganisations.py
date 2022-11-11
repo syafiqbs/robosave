@@ -22,4 +22,4 @@ def getBillingOrganizations():
         org[billingOrg['BillingOrgName']]= billingOrg['AccountID']
     return org
 
-print(getBillingOrganizations())
+# print(getBillingOrganizations())
