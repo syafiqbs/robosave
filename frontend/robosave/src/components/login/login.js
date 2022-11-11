@@ -125,8 +125,6 @@ class Login extends React.Component {
     .then(response => response.json())
     .then(data => {
       this.setState({ postData: data })
-      console.log(data)
-      console.log(data.message)
       // stringify and set to session
       sessionStorage.setItem("customerInformation", JSON.stringify(data));
       if (data.message === "Existing account" || data.message === "Account has been created.") {
@@ -145,10 +143,9 @@ class Login extends React.Component {
     console.log(temp.customerAccounts.account[0].accountID)
   }
 
-  clearSession() {
-    // console.log("----------------------------------")
-    // // call and parse it back to access it as a JSON object
+  clearSessionLogout() {
     sessionStorage.clear()
+    window.location.href = "/"
   }
 
   render() {

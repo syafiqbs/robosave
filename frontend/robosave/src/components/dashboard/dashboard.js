@@ -20,8 +20,31 @@ class Dashboard extends React.Component {
   componentDidMount() {
     let params = new URLSearchParams(document.location.search);
     let aID = params.get("aID");
-    if (aID) {this.setState({ aID: aID})}
-    console.log(aID)
+    if (aID) {this.setState({ aID: aID })} // to do a no account redirect
+    
+    const customerInformation = JSON.parse(sessionStorage.getItem("customerInformation"))
+    this.setState({customerAccounts: customerInformation.customerAccounts, customerDetails: customerInformation.customerDetails})
+
+    let month = new Date().getMonth() + 1
+    this.setState({month: month})
+
+    let firstAPICall = fetch('http://127.0.0.1:5100/transaction/' + customerInformation.customerDetails.taxIdentifier + "/" + month);
+    // let secondAPICall = fetch('http://127.0.0.1:5000/job_role_skill_map/' + role_id);
+    Promise.all([firstAPICall])
+      .then(values => Promise.all(values.map(value => value.json())))
+      .then(data => {
+        let roundup = data[0].data.roundup.toFixed(2)
+        this.setState({monthRoundUp : roundup})
+      })
+  }
+
+  toMonthName(monthNumber) {
+    const date = new Date();
+    date.setMonth(monthNumber - 1);
+  
+    return date.toLocaleString('en-US', {
+      month: 'long',
+    });
   }
 
 
@@ -69,25 +92,22 @@ class Dashboard extends React.Component {
 
           <Flex
             bg="gray.100"
-            w="50%"
+            w="75%"
             borderRadius="15px"
             >
           <StatGroup
             m={5}
             >
             <Stat>
-              <StatLabel>Total Savings</StatLabel>
+              <StatLabel w="150px">Total</StatLabel>
               <StatNumber>345,670</StatNumber>
             </Stat>
 
             <Stat
               ml={20}
               >
-              <StatLabel>Clicked</StatLabel>
-              <StatNumber>45</StatNumber>
-              <StatHelpText>
-                January
-              </StatHelpText>
+              <StatLabel w="150px">{this.toMonthName(this.state.month)}'s</StatLabel>              
+              <StatNumber>${this.state.monthRoundUp}</StatNumber>
             </Stat>
           </StatGroup>
           </Flex>
