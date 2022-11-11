@@ -8,6 +8,7 @@ from os import environ
 import json
 from billPayment import billPayment
 from placeMarketOrder import placeMarketOrder
+from getBillingOrganisations import getBillingOrganizations
 import datetime
 import math
 
@@ -61,7 +62,8 @@ def pay():
             print(result)
             if result[0]== 200:  
                 transResult=processTransactionAdd(transactionRecord, result[1]['transactionID'])
-            return transResult
+                return transResult
+            return "error"
 
         except Exception as e:
             # Unexpected error in code
@@ -156,6 +158,12 @@ def invest():
         customer_bank = customer_record['customer']["customer_bankNo"]
         placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, 'AAPL', 'buy', customer_details['qty'])
     return customer_record
+
+#billingorg
+@app.route("/billingorg", methods=["GET"])
+def billingorg():
+    result = getBillingOrganizations
+    return result
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
