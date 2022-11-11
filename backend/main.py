@@ -15,7 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 transaction_URL = "http://localhost:5100/"
-roundup_URL = "http://localhost:5200/"
+roundup_URL = "http://localhost:5002/"
 customer_URL = "http://localhost:5001/"
 
 #Authentication
@@ -84,12 +84,12 @@ def pay():
 def processTransactionAdd(transactionRecord, transactionID):
     # Invoke the transaction microservice
     print('\n-----Invoking transaction microservice-----')
-    date = datetime.datetime.now()
+    date_today = datetime.datetime.now()
     value_before = float(transactionRecord['transactionAmount'])
     value_after =math.ceil(float(transactionRecord['transactionAmount']))
     value_roundup = value_after - value_before
     customer_id = transactionRecord['userID']
-    transactionJSON= json.dumps({'transaction_id': transactionID, 'transaction_date': str(date), 'customer_id':customer_id, 'value_before':value_before, 'value_after': value_after,  'value_roundup':value_roundup })
+    transactionJSON= json.dumps({'transaction_id': transactionID, 'transaction_date': str(date_today), 'customer_id':customer_id, 'value_before':value_before, 'value_after': value_after,  'value_roundup':value_roundup })
 
     record_result = invoke_http(transaction_URL+"transaction", method='POST', json=json.loads(transactionJSON))
     # print('record_result:', record_result)
@@ -105,7 +105,7 @@ def processTransactionAdd(transactionRecord, transactionID):
     # Invoke the roundup microservice
     print('\n-----Invoking roundup microservice-----')
     
-    roundup_month = date.strftime("%m-%Y")
+    roundup_month = date_today.strftime("%m-%Y")
     roundupJSON= json.dumps({'roundup_date': roundup_month,'customer_id': customer_id, 'roundup_value': value_roundup })
     roundup_result = invoke_http(roundup_URL+ "getRoundupByMY/"+ str(customer_id) +'/'+ str(roundup_month), method='GET')
     # print('roundup_result:', roundup_result)
@@ -147,13 +147,14 @@ def processTransactionAdd(transactionRecord, transactionID):
         }
     
 #invest
-@app.route("/invest", methods=["GET"])
+@app.route("/invest", methods=["POST"])
 def invest():
-    customer_id = 0
-    customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_id), method='GET')
+    customer_details= request.get_json()
+    customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_details['customer_id']), method='GET')
     print(customer_record)
     if customer_record['status'] == 'success':
         customer_bank = customer_record['customer']["customer_bankNo"]
+        placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, 'AAPL', 'buy', customer_details['qty'])
     return customer_record
 
 if __name__ == '__main__':
