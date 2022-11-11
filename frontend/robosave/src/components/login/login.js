@@ -3,13 +3,16 @@ import React from 'react';
 import styles from './login.module.css';
 
 // Chakra UI imports
-import { Center, Text, FormControl, FormLabel,Grid, GridItem, Input, Box, Button, } from '@chakra-ui/react'
+import { Center, Text, FormControl, FormLabel,Grid, GridItem, Input, Box, Button,  Modal,ModalOverlay,ModalContent,ModalHeader,ModalFooter,ModalBody,ModalCloseButton, } from '@chakra-ui/react'
 
 import blackLogo from "../../assets/black-logo.png";
 
 
 class Login extends React.Component {
   state = {
+    isOpen: false,
+    postData: "",
+    OTPStatus: false
   }
 
   handleChange = e => {
@@ -29,52 +32,78 @@ class Login extends React.Component {
     console.log(e.target.name, e.target.value)
   }
   
-  handleRequestOTP = event => {
-    event.preventDefault();
-    const username = this.state.username
-    const pin = this.state.pin
-    // console.log(username, pin)
-    // REQUEST OTP CALL
-    const ApiURL = "http://tbankonline.com/SMUtBank_API/Gateway"
-    const headerObj = {
-      Header: {
-        serviceName: "requestOTP",
-        userID: username,
-        PIN: pin
-      }
-    }
+  onErrorOpen = () => this.setState({ isErrorOpen: true })
+  onErrorClose = () => this.setState({ isErrorOpen: false})
 
-    var header = JSON.stringify(headerObj);
-    var xmlHttp = new XMLHttpRequest();
-    if (xmlHttp === null) {
-      alert("Browser does not support HTTP request.");
-      return;
-    }
-    console.log(ApiURL+"?Header="+header)
-    xmlHttp.open("GET", ApiURL+"?Header="+header, true);
-    xmlHttp.timeout = 5000
+  // handleRequestOTP = event => {
+  //   event.preventDefault();
+  //   const username = this.state.username
+  //   const pin = this.state.pin
+  //   // console.log(username, pin)
+  //   // REQUEST OTP CALL
+  //   const ApiURL = "http://tbankonline.com/SMUtBank_API/Gateway"
+  //   const headerObj = {
+  //     Header: {
+  //       serviceName: "requestOTP",
+  //       userID: username,
+  //       PIN: pin
+  //     }
+  //   }
 
-    // setup http event handlers
-    xmlHttp.onreadystatechange = function() {
-      if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-          let responseObj = JSON.parse(xmlHttp.responseText);
-          let serviceRespHeader = responseObj.Content.ServiceResponse.ServiceRespHeader;
-          let globalErrorID = serviceRespHeader.GlobalErrorID;
-          if (globalErrorID === "010041"){
-              return;
-          }
-          else if (globalErrorID !== "010000"){
-              alert(serviceRespHeader.ErrorDetails);
-              return;
-          }
+  //   var header = JSON.stringify(headerObj);
+  //   var xmlHttp = new XMLHttpRequest();
+  //   if (xmlHttp === null) {
+  //     alert("Browser does not support HTTP request.");
+  //     return;
+  //   }
+  //   console.log(ApiURL+"?Header="+header)
+  //   xmlHttp.open("GET", ApiURL+"?Header="+header, true);
+  //   xmlHttp.timeout = 5000
+
+  //   // setup http event handlers
+  //   xmlHttp.onreadystatechange = function() {
+  //     if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+  //         let responseObj = JSON.parse(xmlHttp.responseText);
+  //         let serviceRespHeader = responseObj.Content.ServiceResponse.ServiceRespHeader;
+  //         let globalErrorID = serviceRespHeader.GlobalErrorID;
+  //         if (globalErrorID === "010041"){
+  //             return;
+  //         }
+  //         else if (globalErrorID !== "010000"){
+  //             alert(serviceRespHeader.ErrorDetails);
+  //             return;
+  //         }
           
-          // display data
-          document.getElementById("requestOTPButton").innerHTML = "OTP Sent";
-      }
-  };			
+  //         // display data
+  //         document.getElementById("requestOTPButton").innerHTML = "OTP Sent";
+  //     }
+  // };			
 
-  // send the http request
-  xmlHttp.send();
+  // // send the http request
+  // xmlHttp.send();
+  // }
+
+  handleRequestOTP = event => {
+    event.preventDefault()
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+            userID: this.state.username,
+            pin: this.state.pin,
+          })
+    };
+    // console.log(requestOptions)
+    fetch('http://127.0.0.1:5000/OTP', requestOptions)
+        .then(response => response.json())
+        .then(data => {
+          this.setState({ postData: data })
+          if (data["0"] === "01000") {
+            this.setState({OTPStatus: true})
+          } else {
+              this.onErrorOpen()
+          }
+        })
   }
 
   handleSignIn = event => {
@@ -82,9 +111,45 @@ class Login extends React.Component {
     const otp = this.state.otp
     console.log(otp)
     // REQUEST OTP CALL
-    
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+            userID: this.state.username,
+            PIN: this.state.pin,
+            OTP: this.state.otp
+          })
+    };
+    console.log(requestOptions)
+    fetch('http://127.0.0.1:5001/checkExisting', requestOptions)
+    .then(response => response.json())
+    .then(data => {
+      this.setState({ postData: data })
+      console.log(data)
+      console.log(data.message)
+      // stringify and set to session
+      sessionStorage.setItem("customerInformation", JSON.stringify(data));
+      if (data.message === "Existing account" || data.message === "Account has been created.") {
+        window.location.href = "/dashboard?aID=" + data.customerAccounts.account[0].accountID
+      } else {
+        this.onErrorOpen()
+      }
+    })
   }
 
+  getSession() {
+    console.log("----------------------------------")
+    // call and parse it back to access it as a JSON object
+    const temp = JSON.parse(sessionStorage.getItem("customerInformation"))
+    console.log(temp.customerDetails)
+    console.log(temp.customerAccounts.account[0].accountID)
+  }
+
+  clearSession() {
+    // console.log("----------------------------------")
+    // // call and parse it back to access it as a JSON object
+    sessionStorage.clear()
+  }
 
   render() {
     return (
@@ -123,7 +188,7 @@ class Login extends React.Component {
                 <Input mb={5} type='password' id="pin" placeholder='6 Digit PIN' name="pin" onChange={(e) => {
                 this.handleChange(e)
               }}/>
-                <Button colorScheme='green' id="requestOTPButton" mt={5} variant='solid' w="100%" bg='green.400' type="submit">
+                <Button colorScheme='green' id="requestOTPButton" mt={5} variant='solid' w="100%" bg='green.400' type="submit" isLoading={this.state.OTPStatus} loadingText='OTP Sending'>
                   Request OTP
                 </Button>
               </FormControl>
@@ -144,9 +209,31 @@ class Login extends React.Component {
                 Go to dashboard (temp button)
               </Button>
             </a>
+              <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="button" onClick={this.getSession}>
+                Get session
+              </Button>
+              <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="button" onClick={this.clearSession}>
+                Clear session
+              </Button>
           </GridItem>
         </Grid>
 
+      {/* Error Modal */}
+        <Modal isOpen={this.state.isErrorOpen} onClose={this.onErrorClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Requesting OTP Failed</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody> Please input correct username/PIN
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme='blue' mr={3} onClick={this.onErrorClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       </div>
     )
   }

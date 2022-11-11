@@ -14,7 +14,14 @@ import { Link } from 'react-router-dom';
 
 class Dashboard extends React.Component {
   state = {
-    
+    aID: ""
+  }
+
+  componentDidMount() {
+    let params = new URLSearchParams(document.location.search);
+    let aID = params.get("aID");
+    if (aID) {this.setState({ aID: aID})}
+    console.log(aID)
   }
 
 
@@ -22,7 +29,7 @@ class Dashboard extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav/>
+        <Sidenav dashboardLink="#"/>
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex
@@ -38,7 +45,7 @@ class Dashboard extends React.Component {
               color="white" 
               bg="black"
               _hover={{boxShadow: "2px 2px 5px #68D391;"}}
-              to="/payment"
+              to= {'/payment?aID=' + this.state.aID}
               >
               Make Payment
               </Button>

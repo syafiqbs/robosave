@@ -25,7 +25,15 @@ class Dashboard extends React.Component {
     description: "",
     accountTo: "",
     pin: "",
+    aID: ""
   };
+
+  componentDidMount() {
+    let params = new URLSearchParams(document.location.search);
+    let aID = params.get("aID");
+    if (aID) {this.setState({ aID: aID})}
+    console.log(aID)
+  }
 
   render() {
     const handleChange = (event, fieldName) => {
@@ -48,7 +56,7 @@ class Dashboard extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav />
+        <Sidenav dashboardLink={"/dashboard?aID=" + this.state.aID}/>
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex flexDir="column" ml={10} mt={10}>

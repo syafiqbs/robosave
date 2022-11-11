@@ -64,7 +64,7 @@ class Sidenav extends React.Component {
                     borderRadius={8}
                     _hover={{color: 'black', backgroundColor: "#68D391"}}
                     w={this.state.smallNav === false && "100%"}
-                    href='#'>
+                    href={this.props.dashboardLink}>
                   <MenuButton>
                       <Flex>
                         <DragHandleIcon/>
