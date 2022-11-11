@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `transaction`;
 CREATE TABLE IF NOT EXISTS `transaction` (
   `transaction_id` int AUTO_INCREMENT NOT NULL,
   `transaction_date` datetime NOT NULL,
-  `customer_id` integer NOT NULL,
+  `customer_id` varchar(64) NOT NULL,
   `value_before` float NOT NULL,
   `value_after` float NOT NULL,
   `value_roundup` float NOT NULL,

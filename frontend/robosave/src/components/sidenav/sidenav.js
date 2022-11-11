@@ -21,6 +21,11 @@ class Sidenav extends React.Component {
     }
   }
 
+  clearSessionLogout() {
+    sessionStorage.clear()
+    window.location.href = "/"
+  }
+
   render() {
     return (
       <Flex>
@@ -64,7 +69,7 @@ class Sidenav extends React.Component {
                     borderRadius={8}
                     _hover={{color: 'black', backgroundColor: "#68D391"}}
                     w={this.state.smallNav === false && "100%"}
-                    href='#'>
+                    href={this.props.dashboardLink}>
                   <MenuButton>
                       <Flex>
                         <DragHandleIcon/>
@@ -93,7 +98,8 @@ class Sidenav extends React.Component {
                     // p={2}
                     // borderRadius={8}
                     w={this.state.smallNav === false && "100%"}
-                    href='/'>
+                    href='/'
+                    onClick={this.clearSessionLogout}>
                     <Flex>
                       <Flex flexDir="column">
                         <Text>Sign Out</Text>

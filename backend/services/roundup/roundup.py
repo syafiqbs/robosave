@@ -20,19 +20,17 @@ CORS(app)
 
 class Roundup(db.Model):
     __table__name = "roundup"
-    roundup_date = db.Column(db.DateTime, primary_key=True)
-    customer_id = db.Column(db.Integer, primary_key=True)
+    roundup_date = db.Column(db.String(64), primary_key=True)
+    customer_id = db.Column(db.String(64), primary_key=True)
     total = db.Column(db.Float, nullable=False)
-    monthly_total = db.Column(db.Float, nullable=False)
 
-    def __init__(self, roundup_date, customer_id, total, monthly_total):
+    def __init__(self, roundup_date, customer_id, total):
         self.roundup_date = roundup_date
         self.customer_id = customer_id
         self.total = total
-        self.monthly_total = monthly_total
 
     def json(self):
-        return {"roundup_date": self.roundup_date, "customer_id": self.customer_id, "total": self.total, "monthly_total": self.monthly_total}
+        return {"roundup_date": self.roundup_date, "customer_id": self.customer_id, "total": self.total}
 
 
 @app.route("/getAllRoundups")
@@ -53,9 +51,26 @@ def get_all_roundups():
     ), 404
 
 
-@app.route("/getRoundupById/<int:customer_id>")
+@app.route("/getRoundupById/<string:customer_id>")
 def get_roundups_by_id(customer_id):
-    roundup = Roundup.query.filter_by(customer_id=customer_id).first()
+    rounduplist = Roundup.query.filter_by(customer_id=customer_id).all()
+    if rounduplist:
+        return jsonify(
+            {
+                "code": 200,
+                "data": [roundup.json() for roundup in rounduplist]
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "message": "Roundup cannot be found."
+        }
+    ), 404
+
+@app.route("/getRoundupByMY/<string:customer_id>/<string:roundup_date>")
+def get_roundups_by_id_and_date(customer_id,roundup_date):
+    roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()
     if roundup:
         return jsonify(
             {
@@ -70,12 +85,13 @@ def get_roundups_by_id(customer_id):
         }
     ), 404
 
-
 @app.route("/createRoundup", methods=['POST'])
 def create_roundup():
     data = request.get_json()
     customer_id = data['customer_id']
-    if (Roundup.query.filter_by(customer_id=customer_id).first()):
+    roundup_date = data['roundup_date']
+    roundup_value = data['roundup_value']
+    if (Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()):
         return jsonify(
             {
                 "code": 400,
@@ -86,10 +102,9 @@ def create_roundup():
             }
         ), 400
 
-    total = 0.0
-    monthly_total = 0.0
+    total = roundup_value
     roundup_date = data['roundup_date']
-    roundup = Roundup(roundup_date, customer_id, total, monthly_total)
+    roundup = Roundup(roundup_date, customer_id, total)
 
     try:
         db.session.add(roundup)
@@ -113,16 +128,15 @@ def create_roundup():
     ), 201
 
 
-@app.route("/updateRoundup/<int:customer_id>", methods=['PUT'])
-def update_roundup(customer_id):
-    roundup = Roundup.query.filter_by(customer_id=customer_id).first()
+@app.route("/updateRoundup/<int:customer_id>/<string:roundup_date>", methods=['PUT'])
+def update_roundup(customer_id, roundup_date):
+    roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()
     if roundup:
         data = request.get_json()
         if data['roundup_date']:
             roundup.roundup_date = data['roundup_date']
         if data['roundup_value']:
             roundup.total += data['roundup_value']
-            roundup.monthly_total += data['roundup_value']
         db.session.commit()
         return jsonify(
             {
@@ -141,9 +155,9 @@ def update_roundup(customer_id):
     ), 404
 
 
-@app.route("/deleteRoundup/<int:customer_id>", methods=['DELETE'])
-def delete_roundup(customer_id):
-    roundup = Roundup.query.filter_by(customer_id=customer_id).first()
+@app.route("/deleteRoundup/<string:customer_id>/<string:roundup_date>", methods=['DELETE'])
+def delete_roundup(customer_id, roundup_date):
+    roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()
     if roundup:
         db.session.delete(roundup)
         db.session.commit()

@@ -51,6 +51,31 @@ def get_all_transactions():
         }
     )
 
+# Get transaction by customer_id
+@app.route("/transaction/<string:customer_id>")
+def get_round_by_custid(customer_id):
+    # roundup = db.session.query(db.func.sum(Transaction.value_roundup)).filter_by(customer_id=customer_id).all()
+    # roundup = re.findall("\d+\.\d+", str(roundup))
+
+    # return jsonify(
+    #     {
+    #         "status":"sucess",
+    #         "data":{
+    #             "roundup":round(float(roundup[0]),2),
+    #         }
+    #     }
+    # )
+    transactionlist = Transaction.query.filter_by(customer_id = customer_id).all()
+    try :
+        return jsonify(
+            {
+                "status":"success",
+                "customer": [transaction.json() for transaction in transactionlist]
+            }
+        )
+    except Exception as e:
+        return e
+
 # Get round up by customer_id and month
 @app.route("/transaction/<string:customer_id>/<string:month>")
 def get_round_by_month(customer_id, month):
