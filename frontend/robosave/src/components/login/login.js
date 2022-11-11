@@ -35,54 +35,6 @@ class Login extends React.Component {
   onErrorOpen = () => this.setState({ isErrorOpen: true })
   onErrorClose = () => this.setState({ isErrorOpen: false})
 
-  // handleRequestOTP = event => {
-  //   event.preventDefault();
-  //   const username = this.state.username
-  //   const pin = this.state.pin
-  //   // console.log(username, pin)
-  //   // REQUEST OTP CALL
-  //   const ApiURL = "http://tbankonline.com/SMUtBank_API/Gateway"
-  //   const headerObj = {
-  //     Header: {
-  //       serviceName: "requestOTP",
-  //       userID: username,
-  //       PIN: pin
-  //     }
-  //   }
-
-  //   var header = JSON.stringify(headerObj);
-  //   var xmlHttp = new XMLHttpRequest();
-  //   if (xmlHttp === null) {
-  //     alert("Browser does not support HTTP request.");
-  //     return;
-  //   }
-  //   console.log(ApiURL+"?Header="+header)
-  //   xmlHttp.open("GET", ApiURL+"?Header="+header, true);
-  //   xmlHttp.timeout = 5000
-
-  //   // setup http event handlers
-  //   xmlHttp.onreadystatechange = function() {
-  //     if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-  //         let responseObj = JSON.parse(xmlHttp.responseText);
-  //         let serviceRespHeader = responseObj.Content.ServiceResponse.ServiceRespHeader;
-  //         let globalErrorID = serviceRespHeader.GlobalErrorID;
-  //         if (globalErrorID === "010041"){
-  //             return;
-  //         }
-  //         else if (globalErrorID !== "010000"){
-  //             alert(serviceRespHeader.ErrorDetails);
-  //             return;
-  //         }
-          
-  //         // display data
-  //         document.getElementById("requestOTPButton").innerHTML = "OTP Sent";
-  //     }
-  // };			
-
-  // // send the http request
-  // xmlHttp.send();
-  // }
-
   handleRequestOTP = event => {
     event.preventDefault()
     const requestOptions = {
@@ -128,7 +80,7 @@ class Login extends React.Component {
       // stringify and set to session
       sessionStorage.setItem("customerInformation", JSON.stringify(data));
       if (data.message === "Existing account" || data.message === "Account has been created.") {
-        window.location.href = "/dashboard?aID=" + data.customerAccounts.account[0].accountID
+        window.location.href = "/dashboard?cID=" + this.state.username
       } else {
         this.onErrorOpen()
       }

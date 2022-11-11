@@ -14,13 +14,14 @@ import { Link } from 'react-router-dom';
 
 class Dashboard extends React.Component {
   state = {
-    aID: ""
+    cID: "",
+    customerTransactions: []
   }
 
   componentDidMount() {
     let params = new URLSearchParams(document.location.search);
-    let aID = params.get("aID");
-    if (aID) {this.setState({ aID: aID })} // to do a no account redirect
+    let cID = params.get("cID");
+    if (cID) {this.setState({ cID: cID })} // to do a no account redirect
     
     const customerInformation = JSON.parse(sessionStorage.getItem("customerInformation"))
     this.setState({customerAccounts: customerInformation.customerAccounts, customerDetails: customerInformation.customerDetails})
@@ -29,12 +30,17 @@ class Dashboard extends React.Component {
     this.setState({month: month})
 
     let firstAPICall = fetch('http://127.0.0.1:5100/transaction/' + customerInformation.customerDetails.taxIdentifier + "/" + month);
-    // let secondAPICall = fetch('http://127.0.0.1:5000/job_role_skill_map/' + role_id);
-    Promise.all([firstAPICall])
+    let secondAPICall = fetch('http://127.0.0.1:5100/transaction/' + customerInformation.customerDetails.taxIdentifier);
+    Promise.all([firstAPICall, secondAPICall])
       .then(values => Promise.all(values.map(value => value.json())))
       .then(data => {
-        let roundup = data[0].data.roundup.toFixed(2)
-        this.setState({monthRoundUp : roundup})
+        
+        // let roundup = data[0].data.roundup.toFixed(2)
+        let roundup = this.fix2dp(data[0].data.roundup)
+        let customerTransactions = data[1].customer
+        console.log(customerTransactions)
+
+        this.setState({monthRoundUp : roundup, customerTransactions: customerTransactions})
       })
   }
 
@@ -45,6 +51,10 @@ class Dashboard extends React.Component {
     return date.toLocaleString('en-US', {
       month: 'long',
     });
+  }
+
+  fix2dp(num) {
+    return num.toFixed(2)
   }
 
 
@@ -68,7 +78,7 @@ class Dashboard extends React.Component {
               color="white" 
               bg="black"
               _hover={{boxShadow: "2px 2px 5px #68D391;"}}
-              to= {'/payment?aID=' + this.state.aID}
+              to= {'/payment?cID=' + this.state.cID}
               >
               Make Payment
               </Button>
@@ -92,7 +102,7 @@ class Dashboard extends React.Component {
 
           <Flex
             bg="gray.100"
-            w="75%"
+            w="60%"
             borderRadius="15px"
             >
           <StatGroup
@@ -104,9 +114,9 @@ class Dashboard extends React.Component {
             </Stat>
 
             <Stat
-              ml={20}
+              // ml={20}
               >
-              <StatLabel w="150px">{this.toMonthName(this.state.month)}'s</StatLabel>              
+              <StatLabel w="250px">{this.toMonthName(this.state.month)}'s Savings</StatLabel>              
               <StatNumber>${this.state.monthRoundUp}</StatNumber>
             </Stat>
           </StatGroup>
@@ -148,27 +158,16 @@ class Dashboard extends React.Component {
                   </Thead>
                   <Tbody>
                     {/* Loop/map here */}
-                    <Tr>
-                      <Td>123456789</Td>
-                      <Td>01/01/2022</Td>
-                      <Td isNumeric>25.40</Td>
-                      <Td isNumeric>0.60</Td>
-                      <Td isNumeric>26.00</Td>
-                    </Tr>
-                    <Tr>
-                      <Td>987654321</Td>
-                      <Td>10/10/1010</Td>
-                      <Td isNumeric>100.90</Td>
-                      <Td isNumeric>0.90</Td>
-                      <Td isNumeric>101.00</Td>
-                    </Tr>
-                    <Tr>
-                      <Td>123012929</Td>
-                      <Td>20/20/2020</Td>
-                      <Td isNumeric>9.50</Td>
-                      <Td isNumeric>0.50</Td>
-                      <Td isNumeric>10.00</Td>
-                    </Tr>
+                    {this.state.customerTransactions
+                      .map((transaction, index) => 
+                        <Tr key={index}>
+                          <Td>{transaction.transaction_id}</Td>
+                          <Td>{transaction.transaction_date}</Td>
+                          <Td isNumeric>${this.fix2dp(transaction.value_before)}</Td>
+                          <Td isNumeric>${this.fix2dp(transaction.value_roundup)}</Td>
+                          <Td isNumeric>$ {this.fix2dp(transaction.value_after)}</Td>
+                          </Tr>)
+                    }
                   </Tbody>
                 </Table>
               </TableContainer>
