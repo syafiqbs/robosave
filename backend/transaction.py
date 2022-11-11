@@ -6,12 +6,15 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 import requests, json
-from functions import url
 from sqlalchemy import extract  
 import re
+import os
+from os import environ
+
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/transaction'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -137,7 +140,7 @@ def billPayment():
         }
     }
     
-    final_url="{0}?Header={1}&Content={2}".format(url(),json.dumps(headerObj),json.dumps(contentObj))
+    final_url="{0}?Header={1}&Content={2}".format("http://tbankonline.com/SMUtBank_API/Gateway",json.dumps(headerObj),json.dumps(contentObj))
     response = requests.post(final_url)
     serviceRespHeader = response.json()['Content']['ServiceResponse']['ServiceRespHeader']
     errorCode = serviceRespHeader['GlobalErrorID']
@@ -156,4 +159,4 @@ def billPayment():
         return(serviceRespHeader['ErrorText'])
     
 if __name__ == '__main__':
-    app.run(port=5100, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
