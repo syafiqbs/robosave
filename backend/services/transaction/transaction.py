@@ -14,6 +14,7 @@ from os import environ
 
 
 app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/transaction'
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -81,16 +82,18 @@ def get_round_by_custid(customer_id):
 def get_round_by_month(customer_id, month):
     roundup = db.session.query(db.func.sum(Transaction.value_roundup)).filter(extract('month', Transaction.transaction_date)==month).filter_by(customer_id=customer_id).all()
     roundup = re.findall("\d+\.\d+", str(roundup))
-
-    return jsonify(
-        {
-            "status":"sucess",
-            "data":{
-                "roundup":round(float(roundup[0]),2),
-                "month":month
+    try:
+            return jsonify(
+            {
+                "status":"sucess",
+                "data":{
+                    "roundup": roundup[0],
+                    "month":month
+                }
             }
-        }
-    )
+        )
+    except Exception as e:
+        return e
 
 # Insert a transaction for a customer
 @app.route("/transaction", methods=["POST"])
@@ -184,4 +187,5 @@ def billPayment():
         return(serviceRespHeader['ErrorText'])
     
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # app.run(port=5400, debug=True)
+    app.run(host='0.0.0.0',port=5000, debug=True)

@@ -29,14 +29,14 @@ class Dashboard extends React.Component {
     let month = new Date().getMonth() + 1
     this.setState({month: month})
 
-    let firstAPICall = fetch('http://127.0.0.1:5100/transaction/' + customerInformation.customerDetails.taxIdentifier + "/" + month);
-    let secondAPICall = fetch('http://127.0.0.1:5100/transaction/' + customerInformation.customerDetails.taxIdentifier);
+    let firstAPICall = fetch('http://127.0.0.1:5100/transaction/' + cID + "/" + month);
+    let secondAPICall = fetch('http://127.0.0.1:5100/transaction/' + cID);
     Promise.all([firstAPICall, secondAPICall])
       .then(values => Promise.all(values.map(value => value.json())))
       .then(data => {
         
         // let roundup = data[0].data.roundup.toFixed(2)
-        let roundup = this.fix2dp(data[0].data.roundup)
+        let roundup = data[0].data.roundup
         let customerTransactions = data[1].customer
         console.log(customerTransactions)
 
