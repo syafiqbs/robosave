@@ -41,6 +41,8 @@ export default function OTPModal(props) {
         colorScheme="green"
         onClick={() => {
           if (props.checkValidForm()) {
+            console.log("valid");
+            props.requestOTP();
             onFirstModalOpen();
           } else {
             // Create toast on error
@@ -75,10 +77,26 @@ export default function OTPModal(props) {
             <ModalFooter justifyContent={"center"}>
               <Button
                 colorScheme="green"
-                onClick={() => {
+                onClick={ async (e) => {
                   if (otp.length > 0) {
+                    // Call OTP API route
+                    let otpRes;
+                    otpRes = await props.checkCustomer(otp);
+                    console.log(otpRes, "otpRes");
+
+                    if (otpRes && otpRes.message === "Existing account") {
                     onFirstModalClose();
-                    onSecondModalOpen();
+                    onSecondModalOpen(); // Move to OTP success re520113s
+                    } else {
+                      // Create toast on error
+                      toast({
+                        title: "Invalid OTP.",
+                        // description: "",
+                        status: "error",
+                        duration: 9000,
+                        isClosable: true,
+                      });
+                    }
                   } else {
                     // Create toast on error
                     toast({
@@ -109,7 +127,7 @@ export default function OTPModal(props) {
             <ModalCloseButton
               onClick={() => {
                 onFirstModalClose();
-                window.location.href = "/dashboard";
+                window.location.href = `/dashboard?cID=${props.paymentState.cID}`;
               }}
             />
           </ModalContent>

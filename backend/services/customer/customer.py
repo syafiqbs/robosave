@@ -171,6 +171,7 @@ def checkifexists():
     data = request.get_json()
     userID = data['userID']
     customerDetails = getCustomerDetails(data)
+    print(customerDetails)
     customerAccounts = getCustomerAccounts(data)
     customerName = customerDetails['givenName']
     customerBankNo = customerAccounts['account'][0]['accountID']

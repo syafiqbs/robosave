@@ -16,9 +16,8 @@ import {
   Input,
   Grid,
   GridItem,
-  Select
+  Select,
 } from "@chakra-ui/react";
-
 
 class Dashboard extends React.Component {
   state = {
@@ -29,29 +28,39 @@ class Dashboard extends React.Component {
     pin: "",
     cID: "",
     bankAccounts: [],
-    organizations : []
+    organizations: [],
   };
 
   componentDidMount() {
     let params = new URLSearchParams(document.location.search);
     let cID = params.get("cID");
-    if (cID) {this.setState({ cID: cID})}
+    if (cID) {
+      this.setState({ cID: cID });
+    }
 
-    const customerInformation = JSON.parse(sessionStorage.getItem("customerInformation"))
-    const bankAccounts = customerInformation.customerAccounts.account
-    this.setState({customerAccounts: customerInformation.customerAccounts, customerDetails: customerInformation.customerDetails, bankAccounts: bankAccounts})
+    const customerInformation = JSON.parse(
+      sessionStorage.getItem("customerInformation")
+    );
+    const bankAccounts = customerInformation.customerAccounts.account;
+    this.setState({
+      customerAccounts: customerInformation.customerAccounts,
+      customerDetails: customerInformation.customerDetails,
+      bankAccounts: bankAccounts,
+    });
 
-    fetch(('http://127.0.0.1:5000/billingorg'))
-      .then(response => response.json())
-      .then(data => {
-        let billingOrgs = []
+    fetch("http://127.0.0.1:5000/billingorg")
+      .then((response) => response.json())
+      .then((data) => {
+        let billingOrgs = [];
         for (const organization in data) {
-          billingOrgs.push({organization: organization, accountID: data[organization]})
+          billingOrgs.push({
+            organization: organization,
+            accountID: data[organization],
+          });
         }
-        
-        this.setState({organizations: billingOrgs})
-      });
 
+        this.setState({ organizations: billingOrgs });
+      });
   }
 
   render() {
@@ -71,38 +80,86 @@ class Dashboard extends React.Component {
       return amount > 0 && accountTo.length > 0 && pin.length > 0;
     };
 
-    const pay = () => {
-
+    const requestOTP = () => {
+      let otp;
       const requestOptions = {
-        method: 'Post',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userID: this.state.cID,
           pin: this.state.pin,
-          otp: "999999",
+        }),
+      };
+      console.log(requestOptions);
+      fetch("http://127.0.0.1:5000/OTP", requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+          this.setState({ postData: data });
+          if (data["0"] === "01000") {
+            this.setState({ OTPStatus: true });
+          } else {
+            // this.onErrorOpen();
+          }
+          // console.log(data, "data")
+        });
+    };
+
+    const checkCustomer = async (otp) => {
+      
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userID: this.state.cID,
+          PIN: this.state.pin,
+          OTP: otp,
+        }),
+      };
+      console.log(requestOptions, "requestOptions");
+      const res = fetch("http://127.0.0.1:5001/checkExisting", requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("data", data);
+            return data;
+            if (data.message === "Existing account") {
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          return err
+        });
+        return res
+    };
+
+    const pay = () => {
+      const requestOptions = {
+        method: "Post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userID: this.state.cID,
+          pin: this.state.pin,
+          otp: "",
           accountFrom: String(Number(this.state.accountFrom)),
           accountTo: this.state.accountTo,
           transactionAmount: this.state.amount,
-          narrative: this.state.description
-        })
-        
+          narrative: this.state.description,
+        }),
       };
-      console.log(requestOptions)
+      console.log(requestOptions);
 
-      fetch(('http://127.0.0.1:5000/pay'), requestOptions)
-      .then(response => response.json())
-      .then(data => {
-        this.setState({ postData: data })
-        console.log(data)
-        // CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR
-      });
-    }
-
+      fetch("http://127.0.0.1:5000/pay", requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+          this.setState({ postData: data });
+          console.log(data);
+          // CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR
+        });
+    };
 
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID}/>
+        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID} />
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex flexDir="column" ml={10} mt={10}>
@@ -116,7 +173,7 @@ class Dashboard extends React.Component {
             py={5}
             ml={"40"}
             // mt={"60"}
-            >
+          >
             <Text fontSize="3xl" fontWeight="bold" align="center" mb={10}>
               Payment Info
             </Text>
@@ -137,13 +194,15 @@ class Dashboard extends React.Component {
               <GridItem>
                 <FormControl isRequired>
                   <FormLabel>Billing Organization</FormLabel>
-                  <Select 
-                    bg='white'
-                    placeholder='Select bank account' 
-                    onChange={(e) => handleChange(e, "accountTo")}
-                  >
-                    {this.state.organizations
-                    .map(org => <option key={org.accountID} value={org.accountID}>{org.organization}</option>)}
+                  <Select
+                    bg="white"
+                    placeholder="Select bank account"
+                    onChange={(e) => handleChange(e, "accountTo")}>
+                    {this.state.organizations.map((org) => (
+                      <option key={org.accountID} value={org.accountID}>
+                        {org.organization}
+                      </option>
+                    ))}
                   </Select>
                 </FormControl>
               </GridItem>
@@ -158,17 +217,19 @@ class Dashboard extends React.Component {
                   />
                 </FormControl>
               </GridItem>
-              
+
               <GridItem>
                 <FormControl isRequired>
                   <FormLabel>Account from</FormLabel>
-                  <Select 
-                  bg='white'
-                  placeholder='Select bank account' 
-                  onChange={(e) => handleChange(e, "accountFrom")}
-                  >
-                    {this.state.bankAccounts
-                    .map(account => <option key={account.accountID} value={account.accountID}>{account.accountID}</option>)}
+                  <Select
+                    bg="white"
+                    placeholder="Select bank account"
+                    onChange={(e) => handleChange(e, "accountFrom")}>
+                    {this.state.bankAccounts.map((account) => (
+                      <option key={account.accountID} value={account.accountID}>
+                        {account.accountID}
+                      </option>
+                    ))}
                   </Select>
                 </FormControl>
               </GridItem>
@@ -189,16 +250,19 @@ class Dashboard extends React.Component {
               </GridItem>
 
               {/* Submit / OTP Modal */}
-              {/* <GridItem>
+              <GridItem>
                 <OTPModal
                   paymentState={this.state}
                   checkValidForm={checkValidForm}
+                  pay={pay}
+                  requestOTP={requestOTP}
+                  checkCustomer={checkCustomer}
                 />
-              </GridItem> */}
-
-              <GridItem>
-                <Button colorScheme="green" onClick={pay}>Confirm</Button>
               </GridItem>
+
+              {/* <GridItem>
+                <Button colorScheme="green" onClick={pay}>Confirm</Button>
+              </GridItem> */}
             </Grid>
           </Flex>
         </Flex>
