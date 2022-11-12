@@ -59,8 +59,9 @@ def get_customer(customer_id):
         return e
 
 @app.route("/customer", methods = ["POST"]) #POST request to create new customer 
-def create_customer():
-    data = request.get_json()
+def create_customer(data):
+    if not data:
+        data = request.get_json()
     newCustomer = Customer(**data)
     try:
         db.session.add(newCustomer)
@@ -105,9 +106,10 @@ def delete_customer(customer_id):
         }), 500
 
 @app.route("/customerdetails") #GET request to retrieve customer details
-def getCustomerDetails():
+def getCustomerDetails(data):
     #Header
-    data = request.get_json()
+    if not data:
+        data = request.get_json()
     serviceName = 'getCustomerDetails'
     userID = data['userID']
     PIN = data['PIN']
@@ -133,9 +135,10 @@ def getCustomerDetails():
         return serviceRespHeader['ErrorText']
 
 @app.route("/customeraccount") # GET request to returns customer accounts
-def getCustomerAccounts():
+def getCustomerAccounts(data):
     #Header
-    data = request.get_json()
+    if not data:
+        data = request.get_json()
     serviceName = 'getCustomerAccounts'
     userID = data['userID']
     PIN = data['PIN']
@@ -167,23 +170,23 @@ def getCustomerAccounts():
 def checkifexists(): 
     data = request.get_json()
     userID = data['userID']
-    customerDetails = requests.get(url_for("getCustomerDetails", _external = True), json = data)
-    customerAccounts = requests.get(url_for("getCustomerAccounts", _external = True), json = data)
-    customerName = customerDetails.json()['givenName']
-    customerBankNo = customerAccounts.json()['account'][0]['accountID']
+    customerDetails = getCustomerDetails(data)
+    customerAccounts = getCustomerAccounts(data)
+    customerName = customerDetails['givenName']
+    customerBankNo = customerAccounts['account'][0]['accountID']
     if (get_customer(userID)): # checks if customer has robosave account
         return {
-            "customerDetails" : customerDetails.json(),
-            "customerAccounts" : customerAccounts.json(),
+            "customerDetails" : customerDetails,
+            "customerAccounts" : customerAccounts,
             'message' : "Existing account"
         }
     else:
         data = {'customer_id': userID, 'customer_name' : customerName, 'customer_bankNo' : customerBankNo}
-        isCreated = requests.post(url_for("create_customer", _external = True), json = data) # creates robosave account for customer
+        isCreated = create_customer(data) # creates robosave account for customer
         if (isCreated):
             return jsonify ({
-                "customerDetails" : customerDetails.json(),
-                "customerAccounts" : customerAccounts.json(),
+                "customerDetails" : customerDetails,
+                "customerAccounts" : customerAccounts,
                 "message" : "Account has been created."
             })
         else : 

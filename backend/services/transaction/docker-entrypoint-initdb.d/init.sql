@@ -4,6 +4,7 @@
 --
 -- Host: 127.0.0.1:3306
 
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
@@ -38,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 
 INSERT INTO `transaction` (`transaction_id`,`transaction_date`, `customer_id`, `value_before`, `value_after`, `value_roundup`) VALUES
 (100, "2021-12-12 15:00:00", 0, 2.50, 3.00, 0.5),
-(101, "2021-12-24 15:00:00", 0, 20.10, 21.00, 0.9);
+(101, "2021-12-24 15:00:00", 0, 20.10, 21.00, 0.9),
+(32131232, "2021-11-24 15:00:00", "stablekwon", 20.10, 21.00, 0.9);
 ;
 COMMIT;
