@@ -131,14 +131,14 @@ class Dashboard extends React.Component {
         return res
     };
 
-    const pay = () => {
+    const pay = async (otp) => {
       const requestOptions = {
         method: "Post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userID: this.state.cID,
           pin: this.state.pin,
-          otp: "",
+          otp,
           accountFrom: String(Number(this.state.accountFrom)),
           accountTo: this.state.accountTo,
           transactionAmount: this.state.amount,
@@ -147,12 +147,15 @@ class Dashboard extends React.Component {
       };
       console.log(requestOptions);
 
-      fetch("http://127.0.0.1:5000/pay", requestOptions)
+      return await fetch("http://127.0.0.1:5000/pay", requestOptions)
         .then((response) => response.json())
         .then((data) => {
           this.setState({ postData: data });
           console.log(data);
-          // CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR
+          return data
+        })
+        .catch(err => {
+          console.log(err)
         });
     };
 

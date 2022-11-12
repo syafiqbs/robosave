@@ -77,21 +77,24 @@ export default function OTPModal(props) {
             <ModalFooter justifyContent={"center"}>
               <Button
                 colorScheme="green"
-                onClick={ async (e) => {
+                onClick={ async () => {
                   if (otp.length > 0) {
                     // Call OTP API route
-                    let otpRes;
-                    otpRes = await props.checkCustomer(otp);
-                    console.log(otpRes, "otpRes");
+                    // let otpRes;
+                    // otpRes = await props.checkCustomer(otp);
+                    // console.log(otpRes, "otpRes");
 
-                    if (otpRes && otpRes.message === "Existing account") {
-                    onFirstModalClose();
-                    onSecondModalOpen(); // Move to OTP success re520113s
+                    let payAttempt;
+                    payAttempt = await props.pay(otp)
+                    console.log(payAttempt, "payAttempt")
+                    if (payAttempt && payAttempt.code === 500) {
+                      onFirstModalClose();
+                      onSecondModalOpen(); // Move to OTP success re520113s
                     } else {
                       // Create toast on error
                       toast({
-                        title: "Invalid OTP.",
-                        // description: "",
+                        title: "Error.",
+                        // description: payAttempt.message,
                         status: "error",
                         duration: 9000,
                         isClosable: true,
