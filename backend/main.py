@@ -11,6 +11,7 @@ from placeMarketOrder import placeMarketOrder
 from getBillingOrganisations import getBillingOrganizations
 import datetime
 import math
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -153,11 +154,19 @@ def processTransactionAdd(transactionRecord, transactionID):
 def invest():
     customer_details= request.get_json()
     customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_details['customer_id']), method='GET')
-    print(customer_record)
     if customer_record['status'] == 'success':
         customer_bank = customer_record['customer']["customer_bankNo"]
-        placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, 'AAPL', 'buy', customer_details['qty'])
-    return customer_record
+        customer_roundups = invoke_http(roundup_URL+ "getRoundupById/"+ str(customer_details['customer_id']), method='GET')
+        roundupTotal = 0
+        currentMonth = str(datetime.now().month) #Choose month
+        for roundups in customer_roundups['data']:
+            if roundups['roundup_date'][5:7] == currentMonth:
+                roundupTotal += roundups['total']
+    return {
+        "total" : roundupTotal,
+        "month" : currentMonth
+        }
+        # placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, 'AAPL', 'buy', customer_details['qty'])
 
 #billingorg
 @app.route("/billingorg", methods=["GET"])

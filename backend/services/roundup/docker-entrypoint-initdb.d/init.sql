@@ -24,7 +24,7 @@ USE `roundup`;
 DROP TABLE IF EXISTS `roundup`;
 CREATE TABLE IF NOT EXISTS `roundup` (
   `roundup_date` varchar(64) NOT NULL,
-  `customer_id` int NOT NULL,
+  `customer_id` varchar(64) NOT NULL,
   `total` float NOT NULL,
   PRIMARY KEY (`customer_id`, `roundup_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `roundup` (
 --
 
 INSERT INTO `roundup` (`roundup_date`,`customer_id`, `total`) VALUES
-("2021-12-12 15:00:00", 0, 0.5, 0.0);
+("2021-12-12 15:00:00", "ABC123", 0.5);
 ;
 
 COMMIT;
