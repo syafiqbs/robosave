@@ -47,8 +47,8 @@ def get_all_customers():
 
 @app.route("/customer/<string:customer_id>") #GET request to get a specific customer
 def get_customer(customer_id):
-    customer = Customer.query.filter_by(customer_id = customer_id).first()
     try :
+        customer = Customer.query.filter_by(customer_id = customer_id).first()
         return jsonify(
             {
                 "status":"success",
@@ -56,7 +56,7 @@ def get_customer(customer_id):
             }
         )
     except Exception as e:
-        return e
+        return False
 
 @app.route("/customer", methods = ["POST"]) #POST request to create new customer 
 def create_customer():
