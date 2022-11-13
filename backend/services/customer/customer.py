@@ -59,9 +59,21 @@ def get_customer(customer_id):
         return e
 
 @app.route("/customer", methods = ["POST"]) #POST request to create new customer 
-def create_customer(data):
-    if not data:
-        data = request.get_json()
+def create_customer():
+    data = request.get_json()
+    newCustomer = Customer(**data)
+    try:
+        db.session.add(newCustomer)
+        db.session.commit()
+        return jsonify({
+            "message": "success"
+        }), 201
+    except Exception:
+        return jsonify({
+            "message": "Unable to commit to database."
+        }), 500
+
+def create_customer_internal(data):
     newCustomer = Customer(**data)
     try:
         db.session.add(newCustomer)
@@ -182,7 +194,7 @@ def checkifexists():
         }
     else:
         data = {'customer_id': userID, 'customer_name' : customerName, 'customer_bankNo' : customerBankNo}
-        isCreated = create_customer(data) # creates robosave account for customer
+        isCreated = create_customer_internal(data) # creates robosave account for customer
         if (isCreated):
             return jsonify ({
                 "customerDetails" : customerDetails,
