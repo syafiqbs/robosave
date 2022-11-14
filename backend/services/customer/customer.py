@@ -185,7 +185,7 @@ def checkifexists():
     customerDetails = getCustomerDetails(data)
     customerAccounts = getCustomerAccounts(data)
     customerName = customerDetails['givenName']
-    customerBankNo = customerAccounts['account'][0]['accountID']
+    customerBankNo = data['customerBankNo']
     if (get_customer(userID)): # checks if customer has robosave account
         return {
             "customerDetails" : customerDetails,

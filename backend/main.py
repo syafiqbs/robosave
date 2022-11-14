@@ -12,6 +12,7 @@ from getBillingOrganisations import getBillingOrganizations
 import math
 from datetime import datetime
 from getStockPrice import getStockPrice
+from getCustomerStocks import getCustomerStocks
 
 app = Flask(__name__)
 CORS(app)
@@ -171,6 +172,18 @@ def invest():
             "orderID": orderID
         }
     )
+
+#Get Customer Stocks
+@app.route("/stocks", methods=["POST"])
+def checkCustomerStocks():
+    data = request.get_json()
+    result = getCustomerStocks(data['userID'], data['PIN'], data['OTP'])
+    return jsonify(
+        {
+            "code": 201,
+            "data": result
+            }
+        )
 
 #billingorg
 @app.route("/billingorg", methods=["GET"])
