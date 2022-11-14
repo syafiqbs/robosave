@@ -54,6 +54,7 @@ class Invest extends React.Component {
     workingRow: "",
     quantity: "",
     investMessage: "",
+    notToday: true
   };
 
   componentDidMount() {
@@ -65,9 +66,16 @@ class Invest extends React.Component {
 
     const pin = sessionStorage.getItem("pin");
     this.setState({ pin: pin });
-    // console.log(pin);
-    // console.log(cID);
-    // get customer stocks details
+
+    const today = new Date().getDate()
+    console.log("Today's dd: " + today)
+
+    let dateToInvest = 15
+    if (Number(today) == dateToInvest) {
+      this.setState({notToday: false})
+    } else {
+      this.setState({notTodayMessage: "Please come back to invest on the " + dateToInvest + "th of the month"})
+    }
 
     const customerInformation = JSON.parse(
       sessionStorage.getItem("customerInformation")
@@ -203,15 +211,16 @@ class Invest extends React.Component {
 
             <Flex h="15vh" pt={10}>
               <Button
+                isDisabled = {this.state.notToday}
                 as={Link}
                 color="white"
                 bg="black"
                 _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
-                onClick={(e) => {
+                onClick={(e) => { 
                   e.preventDefault()
                   this.onBuyModalOpen();
-                  
-                }}>
+                }
+                }>
                 Invest Round Ups
               </Button>
             </Flex>
@@ -274,13 +283,14 @@ class Invest extends React.Component {
           onClose={this.onBuyModalClose}>
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Sell</ModalHeader>
+            <ModalHeader>Invest Round Ups</ModalHeader>
             {/* <ModalHeader>{this.state.actionHeader}</ModalHeader> */}
             <ModalCloseButton />
             <ModalBody>
               <FormControl isRequired>
                 <FormLabel>Account from</FormLabel>
                 <Select
+                  disabled={this.state.notToday}
                   bg="white"
                   placeholder="Select bank account"
                   onChange={(e) => handleChange(e, "accountFrom")}>
@@ -290,9 +300,8 @@ class Invest extends React.Component {
                     </option>
                   ))}
                 </Select>
+                <Text>{this.state.notTodayMessage}</Text>
               </FormControl>
-
-              
             </ModalBody>
 
             <ModalFooter>
