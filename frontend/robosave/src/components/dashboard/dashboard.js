@@ -148,7 +148,12 @@ class Dashboard extends React.Component {
               <TableContainer
                 my={2}
                 >
-                <Table variant='simple'>
+                <Table 
+                variant='simple'
+                height = "250px"
+                display = "block"
+                overflowY = "auto"
+                >
                   <Thead>
                     <Tr>
                       <Th>Transaction ID</Th>

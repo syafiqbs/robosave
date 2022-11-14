@@ -1,6 +1,6 @@
 import React from "react";
 
-// import styles from './dashboard.module.css';
+import styles from './payment.module.css';
 
 // Components
 import Sidenav from "../sidenav/sidenav";
@@ -103,10 +103,9 @@ class Dashboard extends React.Component {
         if (data.code === 201) {
           this.setState({ transactionMessage: "Transaction Successful"})
         } else {
-          this.setState({ transactionMessage: "Transaction Failed"})
+          this.setState({ transactionMessage: data.message})
         }
         this.onErrorOpen()
-        // CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR
       });
     }
 
