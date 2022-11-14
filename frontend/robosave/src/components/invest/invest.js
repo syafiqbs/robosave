@@ -64,8 +64,8 @@ class Invest extends React.Component {
 
     const pin = sessionStorage.getItem("pin");
     this.setState({ pin: pin });
-    console.log(pin);
-    console.log(cID);
+    // console.log(pin);
+    // console.log(cID);
     // get customer stocks details
 
     const customerInformation = JSON.parse(
@@ -91,7 +91,7 @@ class Invest extends React.Component {
     fetch("http://127.0.0.1:5000/stocks", requestOptions)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data, "data");
+        // console.log(data, "data");
         let temp;
         if (data.data && Array.isArray(data.data)) {
           temp = data.data;
@@ -106,20 +106,22 @@ class Invest extends React.Component {
   onBuyModalOpen = () => this.setState({ isBuyModalOpen: true });
   onBuyModalClose = () => {
     this.setState({ isBuyModalOpen: false });
-    window.location.reload();
+    // window.location.reload();
   };
 
-  onSellModalOpen = () => this.setState({ isSellModalOpen: true });
+  onSellModalOpen = () => {this.setState({ isSellModalOpen: true })};
   onSellModalClose = () => {
     this.setState({ isSellModalOpen: false });
-    window.location.reload();
+    // window.location.reload();
+    
   };
 
   render() {
-    console.log(this.state);
+    // console.log(this.state);
     // console.log("session", JSON.parse(sessionStorage.getItem("customerInformation")));
 
     const handleChange = (event, fieldName) => {
+      event.preventDefault()
       this.setState((prevState) => ({
         ...prevState,
         [fieldName]: event.target.value,
@@ -138,7 +140,7 @@ class Invest extends React.Component {
         }),
       };
 
-      console.log(sessionStorage);
+      // console.log(sessionStorage);
 
       fetch("http://127.0.0.1:5000/invest", requestOptions)
         .then((response) => response.json())
@@ -150,7 +152,7 @@ class Invest extends React.Component {
     };
 
     const handleSell = (row) => {
-      // console.log(row);
+      console.log(row);
       let requestOptions = {
         method: "Post",
         headers: { "Content-Type": "application/json" },
@@ -159,7 +161,7 @@ class Invest extends React.Component {
           customer_id: this.state.cID,
           pin: this.state.pin,
           // otp: "999999",
-          symbol: "AAPL",
+          symbol: row.symbol,
           stockQty: this.state.quantity,
         }),
       };
@@ -167,7 +169,7 @@ class Invest extends React.Component {
       fetch("http://127.0.0.1:5000/sell", requestOptions)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
+          // console.log(data);
           // this.setState({ investData: data.data });
         })
         .catch((err) => console.log(err));

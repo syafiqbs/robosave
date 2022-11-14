@@ -179,7 +179,7 @@ def invest():
     customer_bank = customer_details['accountFrom']
     customer_roundup = invoke_http(roundup_URL+ "getRoundupByMY/"+ str(customer_details['customer_id']) +"/" + str(currentMonth+"-" + currentYear), method='GET')
     roundupTotal = customer_roundup['data']['total']
-    symbol = "IBM"
+    symbol = "VAPO"
     stockPrice = getStockPrice(customer_details['customer_id'], customer_details['pin'], customer_details['otp'], symbol)
     stockQty = int(roundupTotal/float(stockPrice))
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, symbol, 'buy', stockQty)
