@@ -37,11 +37,11 @@ def placeMarketOrder(userID, PIN, OTP, settlementAccount, symbol, buyOrSell, qua
     if errorCode == '010000':
         marketOrder = response.json()['Content']['ServiceResponse']['StockOrder']
         print("You have successfully placed a market order. The order ID is {}.".format(marketOrder['orderID']))
-        return marketOrder['orderID']
+        return ['success', marketOrder['orderID']]
 
     elif errorCode == '010041':
         print("OTP has expired.\nYou will receiving a SMS")
     else:
         return serviceRespHeader['ErrorText']
 
-# placeMarketOrder('T0021535', '485689', '999999', '9247', 'AAPL', 'buy', '1')
+print(placeMarketOrder('T0021535', '485689', '999999', '9247', 'AAPL', 'buy', '7'))

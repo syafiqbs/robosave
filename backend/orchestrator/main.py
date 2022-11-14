@@ -216,17 +216,18 @@ def sell():
     customer_bank = customer_details['accountFrom']
     print(customer_details)
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, customer_details['symbol'], 'sell', customer_details['stockQty'])
-    if orderID and orderID[0] == 'success':
-        return jsonify(
-        {
-            "status":"success",
-            "orderID": orderID[1]
-        }
-        )
+    if orderID[0] :
+        if orderID[0] == 'success':
+            return jsonify(
+            {
+                "status":"success",
+                "orderID": orderID[1]
+            }
+            )
     return(
         {
             "status":"failure",
-            "message": "Selling of stock failed."
+            "message": orderID
         }
         )
 
