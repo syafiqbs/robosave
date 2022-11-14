@@ -50,7 +50,7 @@ class Dashboard extends React.Component {
     const bankAccounts = customerInformation.customerAccounts.account
     this.setState({customerAccounts: customerInformation.customerAccounts, customerDetails: customerInformation.customerDetails, bankAccounts: bankAccounts})
 
-    fetch(('http://127.0.0.1:5000/billingorg'))
+    fetch(('http://localhost:5000/billingorg'))
       .then(response => response.json())
       .then(data => {
         let billingOrgs = []

@@ -100,5 +100,16 @@ services:
       - "5002:5000"
     # depends_on:
     #   - 'roundup-database'
+
+  #################################
+  # Orchestrator: The Orchestrator complex microservice
+  #################################
+  orchestrator:
+    build:
+      dockerfile: Dockerfile
+      context: './orchestrator'
+    restart: always
+    ports:
+      - "5000:5000"
       
 
