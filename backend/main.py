@@ -13,6 +13,7 @@ import math
 from datetime import datetime
 from getStockPrice import getStockPrice
 from getCustomerStocks import getCustomerStocks
+from getCustomerAccounts import getCustomerAccounts
 
 app = Flask(__name__)
 CORS(app)
@@ -60,12 +61,30 @@ def pay():
         try:
             transactionRecord = request.get_json()
             print("\nReceived a transaction record in JSON:", transactionRecord)
-            result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['narrative'])
-            print(result)
-            if result[0]== 200:  
-                transResult=processTransactionAdd(transactionRecord, result[1]['transactionID'])
-                return transResult
-            return "error"
+            customerAccDetails = getCustomerAccounts(transactionRecord['userID'],transactionRecord['pin'],  transactionRecord['otp'])
+            account = False
+            for acc in customerAccDetails:
+                if int(acc['accountID']) == int(transactionRecord['accountFrom']):
+                    account= acc
+            if account:
+                if float(account['balance']) >= float(transactionRecord['transactionAmount']):
+                    result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['narrative'])
+                    print(result)
+                    if result[0]== 200:  
+                        transResult=processTransactionAdd(transactionRecord, result[1]['transactionID'])
+                        return transResult
+                    return jsonify({
+                        "code": 500,
+                        "message": "Error while transferring funds."
+                    })
+                return jsonify({
+                            "code": 500,
+                            "message": "Insufficient funds."
+                        })
+            return jsonify({
+                "code": 500,
+                "message": "No bank account found."
+            })
 
         except Exception as e:
             # Unexpected error in code
@@ -121,7 +140,7 @@ def processTransactionAdd(transactionRecord, transactionID):
             return {
                 "code": 500,
                 "data": {"roundup_result": roundup_create},
-                "message": "Roundup update failure."
+                "message": "Roundup create failure."
             }
         
         return {
