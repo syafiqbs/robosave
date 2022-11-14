@@ -12,6 +12,7 @@ from getBillingOrganisations import getBillingOrganizations
 import math
 from datetime import datetime
 from getStockPrice import getStockPrice
+from getCustomerStocks import getCustomerStocks
 from getCustomerAccounts import getCustomerAccounts
 
 app = Flask(__name__)
@@ -140,7 +141,7 @@ def processTransactionAdd(transactionRecord, transactionID):
             return {
                 "code": 500,
                 "data": {"roundup_result": roundup_create},
-                "message": "Roundup update failure."
+                "message": "Roundup create failure."
             }
         
         return {
@@ -191,6 +192,18 @@ def invest():
             "orderID": orderID
         }
     )
+
+#Get Customer Stocks
+@app.route("/stocks", methods=["POST"])
+def checkCustomerStocks():
+    data = request.get_json()
+    result = getCustomerStocks(data['userID'], data['PIN'], data['OTP'])
+    return jsonify(
+        {
+            "code": 201,
+            "data": result
+            }
+        )
 
 #billingorg
 @app.route("/billingorg", methods=["GET"])

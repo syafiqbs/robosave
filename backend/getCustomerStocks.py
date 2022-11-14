@@ -26,32 +26,14 @@ def getCustomerStocks(userID, PIN, OTP):
     if errorCode == '010000':
         depository_list = response.json()['Content']['ServiceResponse']['DepositoryList']
         if depository_list == {}:
-            print("No record found!")
+            return "No record found!"
         else:
             depository_list = depository_list['Depository']
-            recordCount = getRecord(depository_list)
-            if recordCount > 1:
-                for i in range(0,recordCount,1):
-                    depository = depository_list[i]
-                    symbol_company = getStockSymbols(depository['symbol'])
-                    print("\nSymbol Name: {}".format(symbol_company))
-                    print("Quantity: {}".format(depository['quantity']))
-                    print("Price: {}".format(depository['price']))
-                    print("Trading Date: {}".format(depository['tradingDate']))
-                    print("Customer ID: {}".format(depository['customerID']))
-
-                    
-            elif recordCount == 0:
-                    symbol_company = getStockSymbols(depository_list['symbol'])
-                    print("\nSymbol Name: {}".format(symbol_company))
-                    print("Quantity: {}".format(depository_list['quantity']))
-                    print("Price: {}".format(depository_list['price']))
-                    print("Trading Date: {}".format(depository_list['tradingDate']))
-                    print("Customer ID: {}".format(depository_list['customerID']))
+            return depository_list
                     
     elif errorCode == '010041':
-        print("OTP has expired.\nYou will receiving a SMS")
+        return "OTP has expired.\nYou will receiving a SMS"
     else:
-        print(serviceRespHeader['ErrorText'])
+        return serviceRespHeader['ErrorText']
 
-getCustomerStocks('jingyi.yeo.2020', '123456', '460168')         
+getCustomerStocks('T0021535', '485689', '999999')         
