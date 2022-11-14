@@ -202,7 +202,8 @@ def invest():
 @app.route("/stocks", methods=["POST"])
 def checkCustomerStocks():
     data = request.get_json()
-    result = getCustomerStocks(data['userID'], data['PIN'], data['OTP'])
+    result = getCustomerStocks(data['userID'], data['PIN'], data['OTP']) 
+    print(result)
     return jsonify(
         {
             "code": 201,
