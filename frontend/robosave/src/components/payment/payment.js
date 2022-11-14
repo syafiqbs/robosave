@@ -16,7 +16,9 @@ import {
   Input,
   Grid,
   GridItem,
-  Select
+  Select,
+  Link,
+  Modal,ModalOverlay,ModalContent,ModalHeader,ModalFooter,ModalBody,ModalCloseButton,
 } from "@chakra-ui/react";
 
 
@@ -29,8 +31,15 @@ class Dashboard extends React.Component {
     pin: "",
     cID: "",
     bankAccounts: [],
-    organizations : []
+    organizations : [],
+    transactionMessage: ""
   };
+
+  onErrorOpen = () => this.setState({ isErrorOpen: true })
+  onErrorClose = () => {
+    this.setState({ isErrorOpen: false})
+    window.location.reload()
+  }
 
   componentDidMount() {
     let params = new URLSearchParams(document.location.search);
@@ -60,9 +69,6 @@ class Dashboard extends React.Component {
         ...prevState,
         [fieldName]: event.target.value,
       }));
-
-      // console.log("value is:", event.target.value);
-      // console.log(this.state);
     };
 
     const checkValidForm = () => {
@@ -94,6 +100,12 @@ class Dashboard extends React.Component {
       .then(data => {
         this.setState({ postData: data })
         console.log(data)
+        if (data.code === 201) {
+          this.setState({ transactionMessage: "Transaction Successful"})
+        } else {
+          this.setState({ transactionMessage: "Transaction Failed"})
+        }
+        this.onErrorOpen()
         // CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR CREATE MODAL FOR SUCCESS/ERROR
       });
     }
@@ -114,8 +126,8 @@ class Dashboard extends React.Component {
             borderRadius="15px"
             px={10}
             py={5}
-            ml={"40"}
-            // mt={"60"}
+            ml={"20"}
+            mt={"90"}
             >
             <Text fontSize="3xl" fontWeight="bold" align="center" mb={10}>
               Payment Info
@@ -185,7 +197,16 @@ class Dashboard extends React.Component {
               </GridItem>
 
               <GridItem>
-                <Button colorScheme="red">Cancel</Button>
+                <Link
+                  href={"/dashboard?cID=" + this.state.cID}
+                  _hover={{color: 'black', backgroundColor: "#68D391"}}
+                >
+                  <Button 
+                  color = "#E53E3E"
+                  bg= "gray.100"
+                  _hover={{color: 'black', backgroundColor: "#C53030"}}
+                  >Cancel</Button>
+                </Link>
               </GridItem>
 
               {/* Submit / OTP Modal */}
@@ -197,11 +218,34 @@ class Dashboard extends React.Component {
               </GridItem> */}
 
               <GridItem>
-                <Button colorScheme="green" onClick={pay}>Confirm</Button>
+                <Button
+                  color = "green.500"
+                  bg= "gray.100"
+                  _hover={{color: 'black', backgroundColor: "green.300"}} 
+                  onClick={pay}
+                  >Confirm</Button>
               </GridItem>
             </Grid>
           </Flex>
         </Flex>
+
+
+        {/* Error Modal */}
+        <Modal isOpen={this.state.isErrorOpen} onClose={this.onErrorClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Transaction</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody> {this.state.transactionMessage}
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme='blue' mr={3} onClick={this.onErrorClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       </Flex>
     );
   }

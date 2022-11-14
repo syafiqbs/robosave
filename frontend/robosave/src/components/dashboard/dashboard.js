@@ -15,7 +15,9 @@ import { Link } from 'react-router-dom';
 class Dashboard extends React.Component {
   state = {
     cID: "",
-    customerTransactions: []
+    customerTransactions: [],
+    monthRoundUp: "0.00",
+    customerTransactions: [{transaction_id: "No transaction", transaction_date: "", value_before: 0, value_roundup: 0, value_after: 0}]
   }
 
   componentDidMount() {
@@ -54,7 +56,7 @@ class Dashboard extends React.Component {
   }
 
   fix2dp(num) {
-    return num.toFixed(2)
+    return Number(num).toFixed(2)
   }
 
 
@@ -117,7 +119,7 @@ class Dashboard extends React.Component {
               // ml={20}
               >
               <StatLabel w="250px">{this.toMonthName(this.state.month)}'s Savings</StatLabel>              
-              <StatNumber>${this.state.monthRoundUp}</StatNumber>
+              <StatNumber>${this.fix2dp(this.state.monthRoundUp)}</StatNumber>
             </Stat>
           </StatGroup>
           </Flex>
