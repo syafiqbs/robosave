@@ -1,5 +1,5 @@
 import requests, json
-from functions import url
+from orchestrator.functions import url
 
 def placeMarketOrder(userID, PIN, OTP, settlementAccount, symbol, buyOrSell, quantity):
     #Header
@@ -44,4 +44,4 @@ def placeMarketOrder(userID, PIN, OTP, settlementAccount, symbol, buyOrSell, qua
     else:
         return serviceRespHeader['ErrorText']
 
-placeMarketOrder('T0021535', '485689', '999999', '9247', 'AAPL', 'buy', '1')
+placeMarketOrder('stablekwon', '000000', '999999', '9248', 'AAPL', 'buy', '1')

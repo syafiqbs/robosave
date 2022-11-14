@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from functions import url
+from orchestrator.functions import url
 import requests
 from invokes import invoke_http
 import os, sys
@@ -202,8 +202,7 @@ def invest():
 @app.route("/stocks", methods=["POST"])
 def checkCustomerStocks():
     data = request.get_json()
-    result = getCustomerStocks(data['userID'], data['PIN'], data['OTP']) 
-    print(result)
+    result = getCustomerStocks(data['userID'], data['PIN'], data['OTP'])
     return jsonify(
         {
             "code": 201,
@@ -215,6 +214,7 @@ def checkCustomerStocks():
 def sell():
     customer_details = request.get_json()
     customer_bank = customer_details['accountFrom']
+    print(customer_details)
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, customer_details['symbol'], 'sell', customer_details['stockQty'])
     if orderID and orderID[0] == 'success':
         return jsonify(
