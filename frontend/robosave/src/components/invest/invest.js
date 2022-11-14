@@ -57,7 +57,7 @@ class Invest extends React.Component {
       this.setState({ cID: cID });
     }
 
-    const pin = JSON.parse(sessionStorage.getItem("pin"))
+    const pin = sessionStorage.getItem("pin")
     this.setState({ pin: pin})
     console.log(pin)
     console.log(cID)
@@ -76,16 +76,16 @@ class Invest extends React.Component {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        this.setState({ investData: [data.data] });
+        this.setState({ investData: [data.data[0]] });
       })
       .catch((err) => console.log(err));
   }
 
   render() {
-    console.log("state", this.state.investData);
-    if (this.state.investData.length == 0) {
-      return;
-    }
+    console.log("state", this.state.investData[0]);
+    // if (this.state.investData.length == 0) {
+    //   return;
+    // }
 
     const handleBuy = () => {
       let requestOptions = {
@@ -94,7 +94,7 @@ class Invest extends React.Component {
         body: JSON.stringify({
           accountFrom: "9248",
           customer_id: this.state.cID,
-          PIN: "000000",
+          PIN: this.state.pin,
           OTP: "999999",
         }),
       };
@@ -116,7 +116,7 @@ class Invest extends React.Component {
         method: "Post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          accountFrom: "9247",
+          accountFrom: "9248",
           customer_id: this.state.cID,
           pin: this.state.pin,
           // otp: "999999",
@@ -178,7 +178,7 @@ class Invest extends React.Component {
                   </Thead>
                   <Tbody>
                     {/* Loop/map here */}
-                    {this.state.investData.map((row, index) => (
+                    {this.state.investData.length > 0 && this.state.investData.map((row, index) => (
                       <Tr key={index}>
                         <Td>{row.customerID}</Td>
                         <Td>{row.tradingDate}</Td>
