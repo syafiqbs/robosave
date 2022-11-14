@@ -20,6 +20,7 @@ def getCustomerStocks(userID, PIN, OTP):
     
     final_url="{0}?Header={1}".format(url(),json.dumps(headerObj))
     response = requests.post(final_url)
+    print(response)
     serviceRespHeader = response.json()['Content']['ServiceResponse']['ServiceRespHeader']
     errorCode = serviceRespHeader['GlobalErrorID']
 
@@ -36,4 +37,4 @@ def getCustomerStocks(userID, PIN, OTP):
     else:
         return serviceRespHeader['ErrorText']
 
-getCustomerStocks('T0021535', '485689', '999999')         
+# getCustomerStocks('T0021535', '485689', '999999')         
