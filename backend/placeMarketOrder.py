@@ -37,7 +37,6 @@ def placeMarketOrder(userID, PIN, OTP, settlementAccount, symbol, buyOrSell, qua
     if errorCode == '010000':
         marketOrder = response.json()['Content']['ServiceResponse']['StockOrder']
         print("You have successfully placed a market order. The order ID is {}.".format(marketOrder['orderID']))
-        print(['success', marketOrder['orderID']])
         return ['success', marketOrder['orderID']]
 
     elif errorCode == '010041':
