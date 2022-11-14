@@ -15,8 +15,8 @@ import { Link } from 'react-router-dom';
 class Dashboard extends React.Component {
   state = {
     cID: "",
-    customerTransactions: [],
     monthRoundUp: "0.00",
+    totalSavings: 0,
     customerTransactions: [{transaction_id: "No transaction", transaction_date: "", value_before: 0, value_roundup: 0, value_after: 0}]
   }
 
@@ -33,16 +33,22 @@ class Dashboard extends React.Component {
 
     let firstAPICall = fetch('http://127.0.0.1:5100/transaction/' + cID + "/" + month);
     let secondAPICall = fetch('http://127.0.0.1:5100/transaction/' + cID);
-    Promise.all([firstAPICall, secondAPICall])
+    let thirdAPICall = fetch('http://127.0.0.1:5002/getRoundupById/' + cID);
+    Promise.all([firstAPICall, secondAPICall, thirdAPICall])
       .then(values => Promise.all(values.map(value => value.json())))
       .then(data => {
         
         // let roundup = data[0].data.roundup.toFixed(2)
         let roundup = data[0].data.roundup
         let customerTransactions = data[1].customer
+        // console.log(customerTransactions)
+        let roundUpData = data[2].data
+        let total = 0
+        for (let roundup of roundUpData) {
+          total += roundup.total
+        }
         console.log(customerTransactions)
-
-        this.setState({monthRoundUp : roundup, customerTransactions: customerTransactions})
+        this.setState({monthRoundUp : roundup, customerTransactions: customerTransactions, totalSavings: total})
       })
   }
 
@@ -57,6 +63,11 @@ class Dashboard extends React.Component {
 
   fix2dp(num) {
     return Number(num).toFixed(2)
+  }
+
+  changeDateTime(date) {
+    const d = new Date(date)
+    return d.toLocaleString("en-SG")
   }
 
 
@@ -112,7 +123,7 @@ class Dashboard extends React.Component {
             >
             <Stat>
               <StatLabel w="150px">Total</StatLabel>
-              <StatNumber>345,670</StatNumber>
+              <StatNumber>${this.fix2dp(this.state.totalSavings)}</StatNumber>
             </Stat>
 
             <Stat
@@ -169,7 +180,7 @@ class Dashboard extends React.Component {
                       .map((transaction, index) => 
                         <Tr key={index}>
                           <Td>{transaction.transaction_id}</Td>
-                          <Td>{transaction.transaction_date}</Td>
+                          <Td>{this.changeDateTime(transaction.transaction_date)}</Td>
                           <Td isNumeric>${this.fix2dp(transaction.value_before)}</Td>
                           <Td isNumeric>${this.fix2dp(transaction.value_roundup)}</Td>
                           <Td isNumeric>$ {this.fix2dp(transaction.value_after)}</Td>

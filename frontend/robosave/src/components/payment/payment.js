@@ -217,12 +217,20 @@ class Dashboard extends React.Component {
               </GridItem> */}
 
               <GridItem>
-                <Button
+                {/* <Button
                   color = "green.500"
                   bg= "gray.100"
                   _hover={{color: 'black', backgroundColor: "green.300"}} 
                   onClick={pay}
-                  >Confirm</Button>
+                  >Confirm</Button> */}
+                  <Button
+                  color="white" 
+                  bg="black"
+                  _hover={{boxShadow: "2px 2px 5px #68D391;"}}
+                  onClick={pay}
+                  >
+                  Make Payment
+                  </Button>
               </GridItem>
             </Grid>
           </Flex>
