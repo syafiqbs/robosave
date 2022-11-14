@@ -72,9 +72,18 @@ def pay():
                     if result[0]== 200:  
                         transResult=processTransactionAdd(transactionRecord, result[1]['transactionID'])
                         return transResult
-                    return "error"
-                return "Insufficient funds."
-            return "No account found."
+                    return jsonify({
+                        "code": 500,
+                        "message": "Error while transferring funds."
+                    })
+                return jsonify({
+                            "code": 500,
+                            "message": "Insufficient funds."
+                        })
+            return jsonify({
+                "code": 500,
+                "message": "No bank account found."
+            })
 
         except Exception as e:
             # Unexpected error in code
