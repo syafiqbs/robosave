@@ -12,6 +12,7 @@ from getBillingOrganisations import getBillingOrganizations
 import math
 from datetime import datetime
 from getStockPrice import getStockPrice
+from getCustomerAccounts import getCustomerAccounts
 
 app = Flask(__name__)
 CORS(app)
@@ -59,12 +60,21 @@ def pay():
         try:
             transactionRecord = request.get_json()
             print("\nReceived a transaction record in JSON:", transactionRecord)
-            result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['narrative'])
-            print(result)
-            if result[0]== 200:  
-                transResult=processTransactionAdd(transactionRecord, result[1]['transactionID'])
-                return transResult
-            return "error"
+            customerAccDetails = getCustomerAccounts(transactionRecord['userID'],transactionRecord['pin'],  transactionRecord['otp'])
+            account = False
+            for acc in customerAccDetails:
+                if int(acc['accountID']) == int(transactionRecord['accountFrom']):
+                    account= acc
+            if account:
+                if float(account['balance']) >= float(transactionRecord['transactionAmount']):
+                    result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['narrative'])
+                    print(result)
+                    if result[0]== 200:  
+                        transResult=processTransactionAdd(transactionRecord, result[1]['transactionID'])
+                        return transResult
+                    return "error"
+                return "Insufficient funds."
+            return "No account found."
 
         except Exception as e:
             # Unexpected error in code
@@ -155,13 +165,14 @@ def invest():
     customer_details= request.get_json()
     customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_details['customer_id']), method='GET')
     if customer_record['status'] == 'success':
-        customer_bank = customer_record['customer']["customer_bankNo"]
-        customer_roundup = invoke_http(roundup_URL+ "getRoundupById/"+ str(customer_details['customer_id']), method='GET')
-        roundupTotal = customer_roundup['data'][0]['total']
         currentMonth = str(datetime.now().month) #Choose month
+        currentYear = str(datetime.now().year) #Choose month
+        customer_bank = customer_record['customer']["customer_bankNo"]
+        customer_roundup = invoke_http(roundup_URL+ "getRoundupById/"+ str(customer_details['customer_id']) + "/" + + str( currentMonth + "-" + currentYear ), method='GET')
+        roundupTotal = customer_roundup['data']['total']
     symbol = "IBM"
     stockPrice = getStockPrice(customer_details['customer_id'], customer_details['pin'], customer_details['otp'], symbol)
-    stockQty = int(roundupTotal//float(stockPrice)) -1
+    stockQty = int(roundupTotal//float(stockPrice)) -1 
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, symbol, 'buy', stockQty)
     return jsonify(
         {

@@ -1,7 +1,30 @@
 import requests, json
 from functions import url, getRecord
-from getProductTypes import getProductTypes
-
+def getProductTypes(ProductID):
+    serviceName = 'getProductTypes'
+    headerObj = {
+                        'Header': {
+                        'serviceName': serviceName,
+                        'userID': '',
+                        'PIN': '',
+                        'OTP': ''
+                        }
+                        }
+    final_url="{0}?Header={1}".format(url(),json.dumps(headerObj))
+    response = requests.post(final_url)
+    product = response.json()['Content']['ServiceResponse']['ProductList']['Product']
+    ID_List= []
+    Name_List = []
+    for i in range(len(product)):
+        ProductType = product[i]
+        ID_List.append(ProductType['ProductID'])
+        Name_List.append(ProductType['ProductName'])
+    if ProductID in ID_List:
+        index = ID_List.index(ProductID)
+        return Name_List[index]
+    else:
+        return 'Record not found'
+    
 def getCustomerAccounts(userId, pin, otp):
     #Header
     serviceName = 'getCustomerAccounts'
@@ -46,6 +69,7 @@ def getCustomerAccounts(userId, pin, otp):
                     print('Current Status: {}'.format(account['currentStatus']))
                     print('Officer ID: {}'.format(account['officerID']))
                     print('Currency: {}'.format(account['currency']))
+                return acc_list
             elif recordCount == 0:
                 acc_type = getProductTypes(acc_list['productID'])
                 print('Balance: {}'.format(acc_list['balance']))
@@ -60,9 +84,10 @@ def getCustomerAccounts(userId, pin, otp):
                 print('Current Status: {}'.format(acc_list['currentStatus']))
                 print('Officer ID: {}'.format(acc_list['officerID']))
                 print('Currency: {}'.format(acc_list['currency']))
+            return acc_list
     elif errorCode == '010041':
         print("OTP has expired.\nYou will receiving a SMS")
     else:
         print(serviceRespHeader['ErrorText'])
 
-# getCustomerAccounts('jingyi.yeo.2020', '123456', '639967')
+# getCustomerAccounts('jingyi.yeo.2020', '123456', '999999')
