@@ -155,14 +155,16 @@ def invest():
     customer_details= request.get_json()
     customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_details['customer_id']), method='GET')
     if customer_record['status'] == 'success':
-        customer_bank = customer_record['customer']["customer_bankNo"]
-        customer_roundup = invoke_http(roundup_URL+ "getRoundupById/"+ str(customer_details['customer_id']), method='GET')
-        roundupTotal = customer_roundup['data'][0]['total']
         currentMonth = str(datetime.now().month) #Choose month
+        currentYear = str(datetime.now().year) #Choose year
+        customer_bank = customer_record['customer']["customer_bankNo"]
+        customer_roundup = invoke_http(roundup_URL+ "getRoundupByMY/"+ str(customer_details['customer_id']) +"/" + str(currentMonth+"-" + currentYear), method='GET')
+        roundupTotal = customer_roundup['data']['total']
     symbol = "IBM"
     stockPrice = getStockPrice(customer_details['customer_id'], customer_details['pin'], customer_details['otp'], symbol)
-    stockQty = int(roundupTotal//float(stockPrice)) -1
+    stockQty = int(roundupTotal/float(stockPrice))
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, symbol, 'buy', stockQty)
+    print(roundupTotal)
     return jsonify(
         {
             "status":"success",
