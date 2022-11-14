@@ -113,7 +113,7 @@ class Dashboard extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID}/>
+        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID} investLink={`/invest?cID=${this.state.cID}`} />
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex flexDir="column" ml={10} mt={10}>
