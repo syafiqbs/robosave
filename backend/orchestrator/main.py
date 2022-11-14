@@ -185,10 +185,13 @@ def invest():
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, symbol, 'buy', stockQty)
     print(roundupTotal)
     if orderID and orderID[0] == 'success':
+        updateJSON= json.dumps({'roundup_date': str(currentMonth+"-" + currentYear), 'roundup_value': "0.0" })
+        update_roundup = invoke_http(roundup_URL+ "updateRoundup/"+ str(customer_details['customer_id']) +'/'+ str(currentMonth+"-" + currentYear), method='PUT', json=json.loads(updateJSON))
         return jsonify(
         {
             "status":"success",
-            "orderID": orderID[1]
+            "orderID": orderID[1],
+            "roundup": update_roundup['data']['total']
         }
         )
     return(
