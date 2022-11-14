@@ -36,7 +36,4 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 --
 -- Dumping data for table `transaction`
 --
-
-INSERT INTO `transaction` (`transaction_id`,`transaction_date`, `customer_id`, `value_before`, `value_after`, `value_roundup`) VALUES
-;
 COMMIT;

@@ -186,12 +186,19 @@ def invest():
     stockQty = int(roundupTotal/float(stockPrice))
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, symbol, 'buy', stockQty)
     print(roundupTotal)
-    return jsonify(
+    if orderID and orderID[0] == 'success':
+        return jsonify(
         {
             "status":"success",
             "orderID": orderID
         }
-    )
+        )
+    return(
+        {
+            "status":"failure",
+            "message": orderID
+        }
+        )
 
 #Get Customer Stocks
 @app.route("/stocks", methods=["POST"])
@@ -203,6 +210,26 @@ def checkCustomerStocks():
             "code": 201,
             "data": result
             }
+        )
+#Sell customer Stocks
+@app.route("/sell", methods=["POST"])
+def sell():
+    customer_details = request.get_json()
+    customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_details['customer_id']), method='GET')
+    customer_bank = customer_record['customer']["customer_bankNo"]
+    orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, customer_details['symbol'], 'sell', customer_details['stockQty'])
+    if orderID and orderID[0] == 'success':
+        return jsonify(
+        {
+            "status":"success",
+            "orderID": orderID
+        }
+        )
+    return(
+        {
+            "status":"failure",
+            "message": "Selling of stock failed."
+        }
         )
 
 #billingorg
