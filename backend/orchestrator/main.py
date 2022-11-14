@@ -22,10 +22,6 @@ transaction_URL = "http://host.docker.internal:5100/"
 roundup_URL = "http://host.docker.internal:5002/"
 customer_URL = "http://host.docker.internal:5001/"
 
-@app.route("/hello_world")
-def hello_world():
-    return requests.get(customer_URL + "customer")
-
 #Authentication
 @app.route("/OTP", methods=["POST"])
 def requestOTP():
@@ -67,9 +63,10 @@ def pay():
             print("\nReceived a transaction record in JSON:", transactionRecord)
             customerAccDetails = getCustomerAccounts(transactionRecord['userID'],transactionRecord['pin'],  transactionRecord['otp'])
             account = False
-            for acc in customerAccDetails:
-                if int(acc['accountID']) == int(transactionRecord['accountFrom']):
-                    account= acc
+            if customerAccDetails:
+                for acc in customerAccDetails:
+                    if int(acc['accountID']) == int(transactionRecord['accountFrom']):
+                        account= acc
             if account:
                 if float(account['balance']) >= float(transactionRecord['transactionAmount']):
                     result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['narrative'])
@@ -177,24 +174,29 @@ def processTransactionAdd(transactionRecord, transactionID):
 @app.route("/invest", methods=["POST"]) #Requires customer_id, pin, otp
 def invest():
     customer_details= request.get_json()
-    customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_details['customer_id']), method='GET')
-    if customer_record['status'] == 'success':
-        currentMonth = str(datetime.now().month) #Choose month
-        currentYear = str(datetime.now().year) #Choose year
-        customer_bank = customer_record['customer']["customer_bankNo"]
-        customer_roundup = invoke_http(roundup_URL+ "getRoundupByMY/"+ str(customer_details['customer_id']) +"/" + str(currentMonth+"-" + currentYear), method='GET')
-        roundupTotal = customer_roundup['data']['total']
+    currentMonth = str(datetime.now().month) #Choose month
+    currentYear = str(datetime.now().year) #Choose year
+    customer_bank = customer_details['accountFrom']
+    customer_roundup = invoke_http(roundup_URL+ "getRoundupByMY/"+ str(customer_details['customer_id']) +"/" + str(currentMonth+"-" + currentYear), method='GET')
+    roundupTotal = customer_roundup['data']['total']
     symbol = "IBM"
     stockPrice = getStockPrice(customer_details['customer_id'], customer_details['pin'], customer_details['otp'], symbol)
     stockQty = int(roundupTotal/float(stockPrice))
     orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, symbol, 'buy', stockQty)
     print(roundupTotal)
-    return jsonify(
+    if orderID and orderID[0] == 'success':
+        return jsonify(
         {
             "status":"success",
-            "orderID": orderID
+            "orderID": orderID[1]
         }
-    )
+        )
+    return(
+        {
+            "status":"failure",
+            "message": orderID
+        }
+        )
 
 #Get Customer Stocks
 @app.route("/stocks", methods=["POST"])
@@ -207,6 +209,26 @@ def checkCustomerStocks():
             "data": result
             }
         )
+#Sell customer Stocks
+@app.route("/sell", methods=["POST"])
+def sell():
+    customer_details = request.get_json()
+    customer_bank = customer_details['accountFrom']
+    print(customer_details)
+    orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, customer_details['symbol'], 'sell', customer_details['stockQty'])
+    if orderID and orderID[0] == 'success':
+        return jsonify(
+        {
+            "status":"success",
+            "orderID": orderID[1]
+        }
+        )
+    return(
+        {
+            "status":"failure",
+            "message": "Selling of stock failed."
+        }
+        )
 
 #billingorg
 @app.route("/billingorg", methods=["GET"])
@@ -216,4 +238,3 @@ def billingorg():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-    # app.run(port=5000, debug=True)

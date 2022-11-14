@@ -111,19 +111,20 @@ class Invest extends React.Component {
     };
 
     const handleSell = (row) => {
-      console.log(row);
+      // console.log(row);
       let requestOptions = {
-        method: "post",
+        method: "Post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          accountFrom: "9248",
-          userID: "stablekwon",
-          PIN: "000000",
-          OTP: "999999",
+          accountFrom: "9247",
+          customer_id: this.state.cID,
+          pin: this.state.pin,
+          // otp: "999999",
           symbol: "AAPL",
           stockQty: "1",
         }),
       };
+      console.log(requestOptions)
       fetch("http://127.0.0.1:5000/sell", requestOptions)
         .then((response) => response.json())
         .then((data) => {

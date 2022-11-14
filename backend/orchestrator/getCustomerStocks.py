@@ -37,4 +37,4 @@ def getCustomerStocks(userID, PIN, OTP):
     else:
         return serviceRespHeader['ErrorText']
 
-# getCustomerStocks('T0021535', '485689', '999999')         
+# print(getCustomerStocks('T0021535', '485689', '999999'))
