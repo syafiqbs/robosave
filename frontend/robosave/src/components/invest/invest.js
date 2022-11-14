@@ -32,6 +32,7 @@ import {
   Th,
   Tbody,
   Td,
+  FormHelperText,
 } from "@chakra-ui/react";
 
 import { Link } from "react-router-dom";
@@ -48,6 +49,10 @@ class Invest extends React.Component {
     organizations: [],
     transactionMessage: "",
     investData: [],
+    isSellModalOpen: false,
+    isBuyModalOpen: false,
+    workingRow: "",
+    quantity: "",
   };
 
   componentDidMount() {
@@ -62,6 +67,17 @@ class Invest extends React.Component {
     console.log(pin);
     console.log(cID);
     // get customer stocks details
+
+    const customerInformation = JSON.parse(
+      sessionStorage.getItem("customerInformation")
+    );
+    const bankAccounts = customerInformation.customerAccounts.account;
+    this.setState({
+      customerAccounts: customerInformation.customerAccounts,
+      customerDetails: customerInformation.customerDetails,
+      bankAccounts: bankAccounts,
+    });
+
     let requestOptions = {
       method: "Post",
       headers: { "Content-Type": "application/json" },
@@ -78,30 +94,47 @@ class Invest extends React.Component {
         console.log(data, "data");
         let temp;
         if (data.data && Array.isArray(data.data)) {
-          temp = data.data
+          temp = data.data;
         } else {
-          temp = [data.data]
+          temp = [data.data];
         }
         this.setState({ investData: temp });
       })
       .catch((err) => console.log(err));
   }
 
+  onBuyModalOpen = () => this.setState({ isBuyModalOpen: true });
+  onBuyModalClose = () => {
+    this.setState({ isBuyModalOpen: false });
+    window.location.reload();
+  };
+
+  onSellModalOpen = () => this.setState({ isSellModalOpen: true });
+  onSellModalClose = () => {
+    this.setState({ isSellModalOpen: false });
+    window.location.reload();
+  };
+
   render() {
-    console.log("state", this.state.investData[0]);
-    // if (this.state.investData.length == 0) {
-    //   return;
-    // }
+    console.log(this.state);
+    // console.log("session", JSON.parse(sessionStorage.getItem("customerInformation")));
+
+    const handleChange = (event, fieldName) => {
+      this.setState((prevState) => ({
+        ...prevState,
+        [fieldName]: event.target.value,
+      }));
+    };
 
     const handleBuy = () => {
       let requestOptions = {
         method: "Post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          accountFrom: "9248",
+          accountFrom: this.state.accountFrom,
           customer_id: this.state.cID,
-          PIN: this.state.pin,
-          OTP: "999999",
+          pin: this.state.pin,
+          otp: "999999",
         }),
       };
 
@@ -122,12 +155,12 @@ class Invest extends React.Component {
         method: "Post",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          accountFrom: "9248",
+          accountFrom: this.state.accountFrom,
           customer_id: this.state.cID,
           pin: this.state.pin,
           // otp: "999999",
           symbol: "AAPL",
-          stockQty: "1",
+          stockQty: this.state.quantity,
         }),
       };
       console.log(requestOptions);
@@ -164,7 +197,11 @@ class Invest extends React.Component {
                 color="white"
                 bg="black"
                 _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
-                onClick={handleBuy}>
+                onClick={(e) => {
+                  e.preventDefault()
+                  this.onBuyModalOpen();
+                  
+                }}>
                 Buy
               </Button>
             </Flex>
@@ -198,7 +235,10 @@ class Invest extends React.Component {
                                 color="white"
                                 bg="black"
                                 _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
-                                onClick={() => handleSell(row)}>
+                                onClick={() => {
+                                  this.setState({ workingRow: row });
+                                  this.onSellModalOpen();
+                                }}>
                                 Sell
                               </Button>
                             ) : (
@@ -206,8 +246,7 @@ class Invest extends React.Component {
                                 disabled
                                 color="white"
                                 bg="black"
-                                _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
-                                onClick={() => handleSell(row)}>
+                                _hover={{ boxShadow: "2px 2px 5px #68D391;" }}>
                                 Sell
                               </Button>
                             )}
@@ -220,6 +259,111 @@ class Invest extends React.Component {
             </Flex>
           </Flex>
         </Flex>
+
+        {/* Buy Modal */}
+        <Modal
+          isOpen={this.state.isBuyModalOpen}
+          onClose={this.onBuyModalClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Sell</ModalHeader>
+            {/* <ModalHeader>{this.state.actionHeader}</ModalHeader> */}
+            <ModalCloseButton />
+            <ModalBody>
+              <FormControl isRequired>
+                <FormLabel>Account from</FormLabel>
+                <Select
+                  bg="white"
+                  placeholder="Select bank account"
+                  onChange={(e) => handleChange(e, "accountFrom")}>
+                  {this.state.bankAccounts.map((account) => (
+                    <option key={account.accountID} value={account.accountID}>
+                      {account.accountID}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                disabled={
+                  this.state.accountFrom == ""
+                }
+                color="white"
+                bg="black"
+                _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleBuy(this.state.workingRow);
+                  this.onBuyModalClose();
+                }}>
+                Buy
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Sell Modal */}
+        <Modal
+          isOpen={this.state.isSellModalOpen}
+          onClose={this.onSellModalClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Sell</ModalHeader>
+            {/* <ModalHeader>{this.state.actionHeader}</ModalHeader> */}
+            <ModalCloseButton />
+            <ModalBody>
+              <FormControl isRequired>
+                <FormLabel>Account from</FormLabel>
+                <Select
+                  bg="white"
+                  placeholder="Select bank account"
+                  onChange={(e) => handleChange(e, "accountFrom")}>
+                  {this.state.bankAccounts.map((account) => (
+                    <option key={account.accountID} value={account.accountID}>
+                      {account.accountID}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Quantity </FormLabel>
+                <FormHelperText>
+                  Max quantity: {this.state.workingRow.quantity}
+                </FormHelperText>
+                <Input
+                  bg="white"
+                  type="number"
+                  onChange={(e) => handleChange(e, "quantity")}
+                  min={1}
+                  max={this.state.workingRow.quantity}
+                />
+              </FormControl>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                disabled={
+                  this.state.quantity < 1 ||
+                  this.state.quantity > this.state.workingRow.quantity
+                }
+                color="white"
+                bg="black"
+                _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSell(this.state.workingRow);
+                  this.onSellModalClose();
+                }}>
+                Sell
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Flex>
     );
   }
