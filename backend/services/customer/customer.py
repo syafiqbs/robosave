@@ -14,6 +14,7 @@ from getProductTypes import getProductTypes
 from os import environ
 
 app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/customer'
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -24,15 +25,13 @@ class Customer(db.Model):
     __tablename__ = "customer"
     customer_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     customer_name = db.Column(db.String(64), nullable=False)
-    customer_bankNo = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, customer_id, customer_name, customer_bankNo):
+    def __init__(self, customer_id, customer_name):
         self.customer_id = customer_id
         self.customer_name = customer_name
-        self.customer_bankNo = customer_bankNo
 
     def json(self):
-        return {"customer_id":self.customer_id, "customer_name":self.customer_name, "customer_bankNo":self.customer_bankNo}
+        return {"customer_id":self.customer_id, "customer_name":self.customer_name}
     
     
 @app.route("/customer") #GET request to get all customers
@@ -93,7 +92,6 @@ def update_customer(customer_id):
     try:
         customer_to_update.customer_id = data['customer_id']
         customer_to_update.customer_Name = data['customer_name']
-        customer_to_update.customer_bankNo = data['customer_bankNo']
         db.session.commit()
         return jsonify({"message" : "Customer updated successfully!"})
 
@@ -185,7 +183,6 @@ def checkifexists():
     customerDetails = getCustomerDetails(data)
     customerAccounts = getCustomerAccounts(data)
     customerName = customerDetails['givenName']
-    customerBankNo = data['customerBankNo']
     if (get_customer(userID)): # checks if customer has robosave account
         return {
             "customerDetails" : customerDetails,
@@ -193,7 +190,7 @@ def checkifexists():
             'message' : "Existing account"
         }
     else:
-        data = {'customer_id': userID, 'customer_name' : customerName, 'customer_bankNo' : customerBankNo}
+        data = {'customer_id': userID, 'customer_name' : customerName}
         isCreated = create_customer_internal(data) # creates robosave account for customer
         if (isCreated):
             return jsonify ({
@@ -209,3 +206,4 @@ def checkifexists():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+    # app.run(port=5001, debug=True)
