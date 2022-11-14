@@ -62,9 +62,10 @@ def pay():
             print("\nReceived a transaction record in JSON:", transactionRecord)
             customerAccDetails = getCustomerAccounts(transactionRecord['userID'],transactionRecord['pin'],  transactionRecord['otp'])
             account = False
-            for acc in customerAccDetails:
-                if int(acc['accountID']) == int(transactionRecord['accountFrom']):
-                    account= acc
+            if not customerAccDetails:
+                for acc in customerAccDetails:
+                    if int(acc['accountID']) == int(transactionRecord['accountFrom']):
+                        account= acc
             if account:
                 if float(account['balance']) >= float(transactionRecord['transactionAmount']):
                     result= billPayment(transactionRecord['userID'], transactionRecord['pin'], transactionRecord['otp'], transactionRecord['accountFrom'],transactionRecord['accountTo'], transactionRecord['transactionAmount'], transactionRecord['narrative'])
