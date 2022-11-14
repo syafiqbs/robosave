@@ -64,7 +64,7 @@ class Dashboard extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav dashboardLink="#"/>
+        <Sidenav dashboardLink="#" investLink={`/invest?cID=${this.state.cID}`} />
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex
