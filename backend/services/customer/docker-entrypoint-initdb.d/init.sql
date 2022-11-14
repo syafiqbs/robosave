@@ -34,6 +34,6 @@ CREATE TABLE IF NOT EXISTS `customer` (
 --
 
 INSERT INTO `customer` (`customer_id`,`customer_name`, `customer_bankNo`) VALUES
-("ABC123", "John", 1111);
+("stablekwon", "Syafiq", 9248);
 ;
 COMMIT;

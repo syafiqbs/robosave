@@ -9,7 +9,6 @@ import json
 from billPayment import billPayment
 from placeMarketOrder import placeMarketOrder
 from getBillingOrganisations import getBillingOrganizations
-import datetime
 import math
 from datetime import datetime
 
@@ -87,7 +86,7 @@ def pay():
 def processTransactionAdd(transactionRecord, transactionID):
     # Invoke the transaction microservice
     print('\n-----Invoking transaction microservice-----')
-    date_today = datetime.datetime.now()
+    date_today = datetime.now()
     value_before = float(transactionRecord['transactionAmount'])
     value_after =math.ceil(float(transactionRecord['transactionAmount']))
     value_roundup = value_after - value_before
