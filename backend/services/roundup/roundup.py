@@ -137,7 +137,7 @@ def update_roundup(customer_id, roundup_date):
         if data['roundup_date']:
             roundup.roundup_date = data['roundup_date']
         if data['roundup_value']:
-            roundup.total += float(data['roundup_value'])
+            roundup.total = float(data['roundup_value'])
         db.session.commit()
         return jsonify(
             {
