@@ -115,6 +115,29 @@ class Sidenav extends React.Component {
                   </MenuButton>
                 </Link>
               </Menu>
+              <Menu placement="right">
+                <Link
+                  backgroundColor="none"
+                  color="white"
+                  p={2}
+                  borderRadius={8}
+                  _hover={{ color: "black", backgroundColor: "#68D391" }}
+                  w={this.state.smallNav === false && "100%"}
+                  href={this.props.financialLink}>
+                  <MenuButton>
+                    <Flex>
+                      <DragHandleIcon />
+                      <Text
+                        ml={2}
+                        display={
+                          this.state.smallNav === true ? "none" : "flex"
+                        }>
+                        Financial News
+                      </Text>
+                    </Flex>
+                  </MenuButton>
+                </Link>
+              </Menu>
             </Flex>
           </Flex>
 

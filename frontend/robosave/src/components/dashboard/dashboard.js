@@ -75,7 +75,7 @@ class Dashboard extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav dashboardLink="#" investLink={`/invest?cID=${this.state.cID}`} />
+        <Sidenav dashboardLink="#" investLink={`/invest?cID=${this.state.cID}`} financialLink={"/financialNews?cID=" + this.state.cID} />
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex
@@ -109,29 +109,29 @@ class Dashboard extends React.Component {
               fontSize='3xl'
               fontWeight="bold"
               >
-              Savings
+              Roundups
             </Text>
           </Flex>
 
           <Flex
             bg="gray.100"
-            w="60%"
+            w="50%"
             borderRadius="15px"
             >
           <StatGroup
             m={5}
             >
             <Stat>
-              <StatLabel w="150px">Total</StatLabel>
+              <StatLabel w="100%">{this.toMonthName(this.state.month)}'s roundup to be invested</StatLabel>
               <StatNumber>${this.fix2dp(this.state.totalSavings)}</StatNumber>
             </Stat>
-
+{/* 
             <Stat
               // ml={20}
               >
               <StatLabel w="250px">{this.toMonthName(this.state.month)}'s Savings</StatLabel>              
               <StatNumber>${this.fix2dp(this.state.monthRoundUp)}</StatNumber>
-            </Stat>
+            </Stat> */}
           </StatGroup>
           </Flex>
         </Flex>

@@ -75,7 +75,7 @@ class FinancialNews extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID} investLink={`/invest?cID=${this.state.cID}`} />
+        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID} investLink={`/invest?cID=${this.state.cID}`} financialLink={"#"}/>
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex flexDir="column">

@@ -53,6 +53,7 @@ class Invest extends React.Component {
     isBuyModalOpen: false,
     workingRow: "",
     quantity: "",
+    investMessage: "",
   };
 
   componentDidMount() {
@@ -103,6 +104,7 @@ class Invest extends React.Component {
       .catch((err) => console.log(err));
   }
 
+
   onBuyModalOpen = () => this.setState({ isBuyModalOpen: true });
   onBuyModalClose = () => {
     this.setState({ isBuyModalOpen: false });
@@ -113,12 +115,17 @@ class Invest extends React.Component {
   onSellModalClose = () => {
     this.setState({ isSellModalOpen: false });
     // window.location.reload();
-    
   };
 
+  onInvestModalOpen = () => {
+    this.setState({ isInvestModalOpen: true})
+  }
+  onInvestModalClose = () => {
+    this.setState({ isInvestModalOpen: false})
+    window.location.reload();
+  }
+
   render() {
-    // console.log(this.state);
-    // console.log("session", JSON.parse(sessionStorage.getItem("customerInformation")));
 
     const handleChange = (event, fieldName) => {
       event.preventDefault()
@@ -140,15 +147,15 @@ class Invest extends React.Component {
         }),
       };
 
-      // console.log(sessionStorage);
 
       fetch("http://127.0.0.1:5000/invest", requestOptions)
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
-          // this.setState({ investData: data.data });
+          this.setState({ investMessage: "Transaction " + data.status });
         })
         .catch((err) => console.log(err));
+        this.onInvestModalOpen()
     };
 
     const handleSell = (row) => {
@@ -160,7 +167,6 @@ class Invest extends React.Component {
           accountFrom: this.state.accountFrom,
           customer_id: this.state.cID,
           pin: this.state.pin,
-          // otp: "999999",
           symbol: row.symbol,
           stockQty: this.state.quantity,
         }),
@@ -168,11 +174,12 @@ class Invest extends React.Component {
       console.log(requestOptions);
       fetch("http://127.0.0.1:5000/sell", requestOptions)
         .then((response) => response.json())
-        .then((data) => {
-          // console.log(data);
-          // this.setState({ investData: data.data });
+        .then((data) => { 
+          console.log(data.status);
+          this.setState({ investMessage: "Transaction " + data.status });
         })
         .catch((err) => console.log(err));
+      this.onInvestModalOpen()
     };
 
     return (
@@ -181,6 +188,7 @@ class Invest extends React.Component {
         <Sidenav
           dashboardLink={"/dashboard?cID=" + this.state.cID}
           investLink={"#"}
+          financialLink={"/financialNews?cID=" + this.state.cID}
         />
 
         {/* MAIN DASHBOARD FLEX */}
@@ -204,7 +212,7 @@ class Invest extends React.Component {
                   this.onBuyModalOpen();
                   
                 }}>
-                Buy
+                Invest Round Ups
               </Button>
             </Flex>
 
@@ -213,7 +221,6 @@ class Invest extends React.Component {
                 <Table variant="simple" display="block" overflowY="auto">
                   <Thead>
                     <Tr>
-                      <Th>Customer ID</Th>
                       <Th>Trading Date</Th>
                       <Th isNumeric>Price</Th>
                       <Th isNumeric>Quantity</Th>
@@ -226,7 +233,6 @@ class Invest extends React.Component {
                     {this.state.investData.length > 0 &&
                       this.state.investData.map((row, index) => (
                         <Tr key={index}>
-                          <Td>{row.customerID}</Td>
                           <Td>{row.tradingDate}</Td>
                           <Td>{row.price}</Td>
                           <Td>{row.quantity}</Td>
@@ -350,8 +356,8 @@ class Invest extends React.Component {
             <ModalFooter>
               <Button
                 disabled={
-                  this.state.quantity < 1 ||
-                  this.state.quantity > this.state.workingRow.quantity
+                  Number(this.state.quantity) < 1 ||
+                  Number(this.state.quantity) > Number(this.state.workingRow.quantity)
                 }
                 color="white"
                 bg="black"
@@ -362,6 +368,29 @@ class Invest extends React.Component {
                   this.onSellModalClose();
                 }}>
                 Sell
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+
+          {/* Sell Modal */}
+          <Modal
+          isOpen={this.state.isInvestModalOpen}
+          onClose={this.onInvestModalClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Investment</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>{this.state.investMessage}
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="white"
+                bg="black"
+                _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
+                onClick={this.onInvestModalClose}>
+                Close
               </Button>
             </ModalFooter>
           </ModalContent>
