@@ -190,7 +190,7 @@ def invest():
         return jsonify(
         {
             "status":"success",
-            "orderID": orderID
+            "orderID": orderID[1]
         }
         )
     return(
@@ -222,7 +222,7 @@ def sell():
         return jsonify(
         {
             "status":"success",
-            "orderID": orderID
+            "orderID": orderID[1]
         }
         )
     return(
