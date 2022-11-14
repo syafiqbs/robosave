@@ -153,7 +153,7 @@ class Login extends React.Component {
                 </Button>
               </FormControl>
             </form>
-            <a href="/dashboard">
+            {/* <a href="/dashboard">
               <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="button">
                 Go to dashboard (temp button)
               </Button>
@@ -163,7 +163,7 @@ class Login extends React.Component {
               </Button>
               <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="button" onClick={this.clearSession}>
                 Clear session
-              </Button>
+              </Button> */}
           </GridItem>
         </Grid>
 
