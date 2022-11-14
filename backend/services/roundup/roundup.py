@@ -128,7 +128,32 @@ def create_roundup():
         }
     ), 201
 
-
+@app.route("/addToRoundup/<string:customer_id>/<string:roundup_date>", methods=['PUT'])
+def add_to_roundup(customer_id, roundup_date):
+    roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()
+    if roundup:
+        data = request.get_json()
+        if data['roundup_date']:
+            roundup.roundup_date = data['roundup_date']
+        if data['roundup_value']:
+            roundup.total += float(data['roundup_value'])
+        db.session.commit()
+        return jsonify(
+            {
+                "code": 200,
+                "data": roundup.json()
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "data": {
+                "customer_id": customer_id
+            },
+            "message": "Customer not found."
+        }
+    ), 404
+    
 @app.route("/updateRoundup/<string:customer_id>/<string:roundup_date>", methods=['PUT'])
 def update_roundup(customer_id, roundup_date):
     roundup = Roundup.query.filter_by(customer_id=customer_id, roundup_date=roundup_date).first()

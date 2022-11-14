@@ -152,7 +152,7 @@ def processTransactionAdd(transactionRecord, transactionID):
         }
         }
     else:
-        roundup_update = invoke_http(roundup_URL+ "updateRoundup/"+ str(customer_id) +'/'+ str(roundup_month), method='PUT', json=json.loads(roundupJSON))
+        roundup_update = invoke_http(roundup_URL+ "addToRoundup/"+ str(customer_id) +'/'+ str(roundup_month), method='PUT', json=json.loads(roundupJSON))
         roundup_stat = roundup_update['code']
         if roundup_stat not in range(200,300):
             # Return error
