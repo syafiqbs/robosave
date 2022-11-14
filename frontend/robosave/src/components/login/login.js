@@ -79,6 +79,7 @@ class Login extends React.Component {
       this.setState({ postData: data })
       // stringify and set to session
       sessionStorage.setItem("customerInformation", JSON.stringify(data));
+      sessionStorage.setItem("pin", this.state.pin)
       if (data.message === "Existing account" || data.message === "Account has been created.") {
         window.location.href = "/dashboard?cID=" + this.state.username
       } else {

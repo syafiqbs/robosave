@@ -57,13 +57,17 @@ class Invest extends React.Component {
       this.setState({ cID: cID });
     }
 
+    const pin = JSON.parse(sessionStorage.getItem("pin"))
+    this.setState({ pin: pin})
+    console.log(pin)
+    console.log(cID)
     // get customer stocks details
     let requestOptions = {
       method: "Post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userID: "stablekwon",
-        PIN: "000000",
+        userID: cID,
+        PIN: pin,
         OTP: "999999",
       }),
     };
@@ -72,7 +76,7 @@ class Invest extends React.Component {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        this.setState({ investData: data.data });
+        this.setState({ investData: [data.data] });
       })
       .catch((err) => console.log(err));
   }
@@ -134,7 +138,7 @@ class Invest extends React.Component {
         {/* SIDENAV */}
         <Sidenav
           dashboardLink={"/dashboard?cID=" + this.state.cID}
-          investLink={"/invest"}
+          investLink={"#"}
         />
 
         {/* MAIN DASHBOARD FLEX */}
