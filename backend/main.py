@@ -139,7 +139,7 @@ def processTransactionAdd(transactionRecord, transactionID):
             return {
                 "code": 500,
                 "data": {"roundup_result": roundup_create},
-                "message": "Roundup update failure."
+                "message": "Roundup create failure."
             }
         
         return {
