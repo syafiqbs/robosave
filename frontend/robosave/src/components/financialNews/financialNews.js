@@ -19,27 +19,38 @@ import {
   Select,
   Link,
   Modal,ModalOverlay,ModalContent,ModalHeader,ModalFooter,ModalBody,ModalCloseButton,
+  VStack, StackDivider, Box, Image 
 } from "@chakra-ui/react";
 
 
 class FinancialNews extends React.Component {
   state = {
-    amount: "",
     description: "",
     accountTo: "",
     accountFrom: "",
-    pin: "",
     cID: "",
     bankAccounts: [],
     organizations : [],
-    transactionMessage: ""
+    transactionMessage: "",
+    financialNews: [
+      {
+          "uuid": "",
+          "title": "",
+          "description": "",
+          "keywords": "",
+          "snippet": "Seat 1: Sungai Buloh\n\nA vote for the party or the candidate?\n\nAfter the dissolution of Parliament, The Edge reached out to Khairy Jamaluddin for his views on GE...",
+          "url": "",
+          "image_url": "",
+          "language": "",
+          "published_at": "",
+          "source": "",
+          "relevance_score": '',
+          "entities": []
+      }
+    ]
   };
 
-  onErrorOpen = () => this.setState({ isErrorOpen: true })
-  onErrorClose = () => {
-    this.setState({ isErrorOpen: false})
-    window.location.reload()
-  }
+
 
   componentDidMount() {
     let params = new URLSearchParams(document.location.search);
@@ -50,65 +61,16 @@ class FinancialNews extends React.Component {
     const bankAccounts = customerInformation.customerAccounts.account
     this.setState({customerAccounts: customerInformation.customerAccounts, customerDetails: customerInformation.customerDetails, bankAccounts: bankAccounts})
 
-    fetch(('http://localhost:5000/billingorg'))
+    fetch(('https://api.marketaux.com/v1/news/all?language=en&limit=3&api_token=redKCJBblXktRMf6SlVTua0PTPt5MuD9ZPLQQKxT'))
       .then(response => response.json())
       .then(data => {
-        let billingOrgs = []
-        for (const organization in data) {
-          billingOrgs.push({organization: organization, accountID: data[organization]})
-        }
-        
-        this.setState({organizations: billingOrgs})
+        // console.log(data.data)
+        this.setState({financialNews: data.data})
       });
 
   }
 
   render() {
-    const handleChange = (event, fieldName) => {
-      this.setState((prevState) => ({
-        ...prevState,
-        [fieldName]: event.target.value,
-      }));
-    };
-
-    const checkValidForm = () => {
-      const { amount, accountTo, pin } = this.state;
-      console.log(this.state, "state");
-      return amount > 0 && accountTo.length > 0 && pin.length > 0;
-    };
-
-    const pay = () => {
-
-      const requestOptions = {
-        method: 'Post',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userID: this.state.cID,
-          pin: this.state.pin,
-          otp: "999999",
-          accountFrom: String(Number(this.state.accountFrom)),
-          accountTo: this.state.accountTo,
-          transactionAmount: this.state.amount,
-          narrative: this.state.description
-        })
-        
-      };
-      console.log(requestOptions)
-
-      fetch(('http://127.0.0.1:5000/pay'), requestOptions)
-      .then(response => response.json())
-      .then(data => {
-        this.setState({ postData: data })
-        console.log(data)
-        if (data.code === 201) {
-          this.setState({ transactionMessage: "Transaction Successful"})
-        } else {
-          this.setState({ transactionMessage: data.message})
-        }
-        this.onErrorOpen()
-      });
-    }
-
 
     return (
       <Flex>
@@ -116,115 +78,43 @@ class FinancialNews extends React.Component {
         <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID} investLink={`/invest?cID=${this.state.cID}`} />
 
         {/* MAIN DASHBOARD FLEX */}
-        <Flex flexDir="column" ml={10} mt={10}>
-          {/* Payment Info */}
-          <Flex
+        <Flex flexDir="column">
+
+        {/* FINANCIAL NEWS */}
+        <Flex
             flexDir="column"
-            mb={5}
             bg="gray.100"
             borderRadius="15px"
             px={10}
             py={5}
             ml={"20"}
-            mt={"90"}
-            >
+            mt={"30"}
+            mb={"5"}
+            w= "800px"
+          >
             <Text fontSize="3xl" fontWeight="bold" align="center" mb={10}>
-              Payment Info
+              Financial News
             </Text>
-
-            {/* Form Grid */}
-            <Grid gap={6} templateColumns="repeat(2, 1fr)">
-              <GridItem>
-                <FormControl isRequired>
-                  <FormLabel>Amount</FormLabel>
-                  <Input
-                    bg="white"
-                    type="number"
-                    onChange={(e) => handleChange(e, "amount")}
-                  />
-                </FormControl>
-              </GridItem>
-
-              <GridItem>
-                <FormControl isRequired>
-                  <FormLabel>Billing Organization</FormLabel>
-                  <Select 
-                    bg='white'
-                    placeholder='Select bank account' 
-                    onChange={(e) => handleChange(e, "accountTo")}
+            <VStack
+            divider={<StackDivider borderColor='gray.200' />}
+            // spacing={40}
+            align='stretch'
+          >
+            { this.state.financialNews
+              .map((news, index) => 
+                  <Flex key={index}
                   >
-                    {this.state.organizations
-                    .map(org => <option key={org.accountID} value={org.accountID}>{org.organization}</option>)}
-                  </Select>
-                </FormControl>
-              </GridItem>
-
-              <GridItem colSpan={2}>
-                <FormControl>
-                  <FormLabel>Description</FormLabel>
-                  <Input
-                    bg="white"
-                    type="text"
-                    onChange={(e) => handleChange(e, "description")}
-                  />
-                </FormControl>
-              </GridItem>
-              
-              <GridItem>
-                <FormControl isRequired>
-                  <FormLabel>Account from</FormLabel>
-                  <Select 
-                  bg='white'
-                  placeholder='Select bank account' 
-                  onChange={(e) => handleChange(e, "accountFrom")}
-                  >
-                    {this.state.bankAccounts
-                    .map(account => <option key={account.accountID} value={account.accountID}>{account.accountID}</option>)}
-                  </Select>
-                </FormControl>
-              </GridItem>
-
-              <GridItem>
-                <FormControl isRequired>
-                  <FormLabel>PIN</FormLabel>
-                  <Input
-                    bg="white"
-                    type="number"
-                    onChange={(e) => handleChange(e, "pin")}
-                  />
-                </FormControl>
-              </GridItem>
-
-              <GridItem>
-                <Link
-                  href={"/dashboard?cID=" + this.state.cID}
-                  _hover={{color: 'black', backgroundColor: "#68D391"}}
-                >
-                  <Button 
-                  color = "#E53E3E"
-                  bg= "gray.100"
-                  _hover={{color: 'black', backgroundColor: "#C53030"}}
-                  >Cancel</Button>
-                </Link>
-              </GridItem>
-
-              {/* Submit / OTP Modal */}
-              {/* <GridItem>
-                <OTPModal
-                  paymentState={this.state}
-                  checkValidForm={checkValidForm}
-                />
-              </GridItem> */}
-
-              <GridItem>
-                <Button
-                  color = "green.500"
-                  bg= "gray.100"
-                  _hover={{color: 'black', backgroundColor: "green.300"}} 
-                  onClick={pay}
-                  >Confirm</Button>
-              </GridItem>
-            </Grid>
+                    <Box mr="5" mt="2"><Image  src={news.image_url} maxWidth="20" minWidth="20"></Image ></Box>
+                    <Box mb="20">
+                      <Text fontSize='20px' as='u'><a href={news.url}><b>{news.title}</b></a></Text>
+                      <Text>{news.description}</Text>
+                      <Text fontSize='8px'>{news.source} | {news.published_at}</Text>
+                    </Box>
+                  </Flex>
+              )
+            }
+            
+          </VStack>
           </Flex>
         </Flex>
 
