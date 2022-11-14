@@ -39,6 +39,8 @@ def getStockPrice(userId, pin, otp, symbol):
         print("Company: {}".format(stockDetail['company']))
         print("Prev Close: {}".format(stockDetail['prevClose']))
 
+        return stockDetail['price']
+
 
     elif errorCode == '010041':
         print("OTP has expired.\nYou will receiving a SMS")

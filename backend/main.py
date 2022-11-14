@@ -11,6 +11,7 @@ from placeMarketOrder import placeMarketOrder
 from getBillingOrganisations import getBillingOrganizations
 import math
 from datetime import datetime
+from getStockPrice import getStockPrice
 
 app = Flask(__name__)
 CORS(app)
@@ -149,23 +150,25 @@ def processTransactionAdd(transactionRecord, transactionID):
         }
     
 #invest
-@app.route("/invest", methods=["POST"])
+@app.route("/invest", methods=["POST"]) #Requires customer_id, pin, otp
 def invest():
     customer_details= request.get_json()
     customer_record = invoke_http(customer_URL+ "customer/"+ str(customer_details['customer_id']), method='GET')
     if customer_record['status'] == 'success':
         customer_bank = customer_record['customer']["customer_bankNo"]
-        customer_roundups = invoke_http(roundup_URL+ "getRoundupById/"+ str(customer_details['customer_id']), method='GET')
-        roundupTotal = 0
+        customer_roundup = invoke_http(roundup_URL+ "getRoundupById/"+ str(customer_details['customer_id']), method='GET')
+        roundupTotal = customer_roundup['data'][0]['total']
         currentMonth = str(datetime.now().month) #Choose month
-        for roundups in customer_roundups['data']:
-            if roundups['roundup_date'][5:7] == currentMonth:
-                roundupTotal += roundups['total']
-    return {
-        "total" : roundupTotal,
-        "month" : currentMonth
+    symbol = "IBM"
+    stockPrice = getStockPrice(customer_details['customer_id'], customer_details['pin'], customer_details['otp'], symbol)
+    stockQty = int(roundupTotal//float(stockPrice)) -1
+    orderID = placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, symbol, 'buy', stockQty)
+    return jsonify(
+        {
+            "status":"success",
+            "orderID": orderID
         }
-        # placeMarketOrder(customer_details['customer_id'], customer_details['pin'], '999999', customer_bank, 'AAPL', 'buy', customer_details['qty'])
+    )
 
 #billingorg
 @app.route("/billingorg", methods=["GET"])
