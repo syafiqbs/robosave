@@ -191,7 +191,7 @@ def invest():
         {
             "status":"success",
             "orderID": orderID[1],
-            "roundup": update_roundup['data']['total']
+            "roundup": update_roundup
         }
         )
     return(
