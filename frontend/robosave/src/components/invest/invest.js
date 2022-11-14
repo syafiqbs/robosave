@@ -57,10 +57,10 @@ class Invest extends React.Component {
       this.setState({ cID: cID });
     }
 
-    const pin = sessionStorage.getItem("pin")
-    this.setState({ pin: pin})
-    console.log(pin)
-    console.log(cID)
+    const pin = sessionStorage.getItem("pin");
+    this.setState({ pin: pin });
+    console.log(pin);
+    console.log(cID);
     // get customer stocks details
     let requestOptions = {
       method: "Post",
@@ -75,8 +75,14 @@ class Invest extends React.Component {
     fetch("http://127.0.0.1:5000/stocks", requestOptions)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        this.setState({ investData: [data.data[0]] });
+        console.log(data, "data");
+        let temp;
+        if (data.data && Array.isArray(data.data)) {
+          temp = data.data
+        } else {
+          temp = [data.data]
+        }
+        this.setState({ investData: temp });
       })
       .catch((err) => console.log(err));
   }
@@ -99,7 +105,7 @@ class Invest extends React.Component {
         }),
       };
 
-      console.log(sessionStorage)
+      console.log(sessionStorage);
 
       fetch("http://127.0.0.1:5000/invest", requestOptions)
         .then((response) => response.json())
@@ -124,7 +130,7 @@ class Invest extends React.Component {
           stockQty: "1",
         }),
       };
-      console.log(requestOptions)
+      console.log(requestOptions);
       fetch("http://127.0.0.1:5000/sell", requestOptions)
         .then((response) => response.json())
         .then((data) => {
@@ -178,35 +184,36 @@ class Invest extends React.Component {
                   </Thead>
                   <Tbody>
                     {/* Loop/map here */}
-                    {this.state.investData.length > 0 && this.state.investData.map((row, index) => (
-                      <Tr key={index}>
-                        <Td>{row.customerID}</Td>
-                        <Td>{row.tradingDate}</Td>
-                        <Td>{row.price}</Td>
-                        <Td>{row.quantity}</Td>
-                        <Td>{row.symbol}</Td>
-                        <Td>
-                          {row.quantity >= 1 ? (
-                            <Button
-                              color="white"
-                              bg="black"
-                              _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
-                              onClick={() => handleSell(row)}>
-                              Sell
-                            </Button>
-                          ) : (
-                            <Button
-                              disabled
-                              color="white"
-                              bg="black"
-                              _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
-                              onClick={() => handleSell(row)}>
-                              Sell
-                            </Button>
-                          )}
-                        </Td>
-                      </Tr>
-                    ))}
+                    {this.state.investData.length > 0 &&
+                      this.state.investData.map((row, index) => (
+                        <Tr key={index}>
+                          <Td>{row.customerID}</Td>
+                          <Td>{row.tradingDate}</Td>
+                          <Td>{row.price}</Td>
+                          <Td>{row.quantity}</Td>
+                          <Td>{row.symbol}</Td>
+                          <Td>
+                            {row.quantity >= 1 ? (
+                              <Button
+                                color="white"
+                                bg="black"
+                                _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
+                                onClick={() => handleSell(row)}>
+                                Sell
+                              </Button>
+                            ) : (
+                              <Button
+                                disabled
+                                color="white"
+                                bg="black"
+                                _hover={{ boxShadow: "2px 2px 5px #68D391;" }}
+                                onClick={() => handleSell(row)}>
+                                Sell
+                              </Button>
+                            )}
+                          </Td>
+                        </Tr>
+                      ))}
                   </Tbody>
                 </Table>
               </TableContainer>
