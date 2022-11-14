@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `roundup` (
 --
 
 INSERT INTO `roundup` (`roundup_date`,`customer_id`, `total`) VALUES
-("11-22", "stablekwon", 0.0);
+("11-2022", "stablekwon", 0.0);
 ;
 
 COMMIT;
