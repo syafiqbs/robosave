@@ -53,6 +53,7 @@ class Invest extends React.Component {
     isBuyModalOpen: false,
     workingRow: "",
     quantity: "",
+    moneyBack: "",
     investMessage: "",
     notToday: true
   };
@@ -70,7 +71,7 @@ class Invest extends React.Component {
     const today = new Date().getDate()
     console.log("Today's dd: " + today)
 
-    let dateToInvest = 15
+    let dateToInvest = 14
     if (Number(today) == dateToInvest) {
       this.setState({notToday: false})
     } else {
@@ -184,6 +185,10 @@ class Invest extends React.Component {
         .then((response) => response.json())
         .then((data) => { 
           console.log(data.status);
+          if (data.status == "success") {
+            let moneyBack = "$" + (this.state.quantity * row.price).toFixed(2)
+            this.setState({moneyBack: moneyBack + " is deposited back to your bank account." })
+          }
           this.setState({ investMessage: "Transaction " + data.status });
         })
         .catch((err) => console.log(err));
@@ -391,7 +396,7 @@ class Invest extends React.Component {
           <ModalContent>
             <ModalHeader>Investment</ModalHeader>
             <ModalCloseButton />
-            <ModalBody>{this.state.investMessage}
+            <ModalBody>{this.state.investMessage}<br></br>{this.state.moneyBack}
             </ModalBody>
             <ModalFooter>
               <Button
