@@ -25,7 +25,6 @@ DROP TABLE IF EXISTS `customer`;
 CREATE TABLE IF NOT EXISTS `customer` (
   `customer_id` varchar(64) NOT NULL,
   `customer_name` varchar(64) NOT NULL,
-  `customer_bankNo` integer NOT NULL,
   PRIMARY KEY (`customer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -33,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `customer` (
 -- Dumping data for table `customer`
 --
 
-INSERT INTO `customer` (`customer_id`,`customer_name`, `customer_bankNo`) VALUES
-("stablekwon", "Syafiq", 9248);
+INSERT INTO `customer` (`customer_id`,`customer_name`) VALUES
+("stablekwon", "Syafiq");
 ;
 COMMIT;
