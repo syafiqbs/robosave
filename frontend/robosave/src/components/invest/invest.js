@@ -245,7 +245,7 @@ class Invest extends React.Component {
                   <Tbody>
                     {/* Loop/map here */}
                     {this.state.investData.length > 0 &&
-                      this.state.investData.map((row, index) => (
+                      this.state.investData.filter(r => r.quantity > 0).map((row, index) => (
                         <Tr key={index}>
                           <Td>{row.tradingDate}</Td>
                           <Td>{row.price}</Td>
