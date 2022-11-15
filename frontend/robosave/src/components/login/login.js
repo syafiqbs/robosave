@@ -138,7 +138,11 @@ class Login extends React.Component {
                 <Input mb={5} type='password' id="pin" placeholder='6 Digit PIN' name="pin" onChange={(e) => {
                 this.handleChange(e)
               }}/>
-                <Button colorScheme='green' id="requestOTPButton" mt={5} variant='solid' w="100%" bg='green.400' type="submit" isLoading={this.state.OTPStatus} loadingText='OTP Sending'>
+                <Button
+                color="white" 
+                bg="black"
+                _hover={{boxShadow: "2px 2px 5px #68D391;"}}
+                id="requestOTPButton" w="100%" type="submit" isLoading={this.state.OTPStatus} loadingText='OTP Sending'>
                   Request OTP
                 </Button>
               </FormControl>
@@ -149,7 +153,9 @@ class Login extends React.Component {
                 <Input mb={5} type='password' id="otp" placeholder='6 Digit OTP' name="otp" onChange={(e) => {
                 this.handleChange(e)
               }}/>
-                <Button colorScheme='green' mt={5} variant='solid' w="100%" bg='green.400' type="submit">
+                <Button color="white" 
+              bg="black"
+              _hover={{boxShadow: "2px 2px 5px #68D391;"}} mt={5} w="100%" type="submit">
                   Sign In
                 </Button>
               </FormControl>
