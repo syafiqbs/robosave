@@ -44,4 +44,4 @@ def placeMarketOrder(userID, PIN, OTP, settlementAccount, symbol, buyOrSell, qua
     else:
         return serviceRespHeader['ErrorText']
 
-print(placeMarketOrder('stablekwon', '000000', '999999', '9248', 'AAPL', 'buy', '1'))
+# print(placeMarketOrder('stablekwon', '000000', '999999', '9248', 'AAPL', 'buy', '1'))
