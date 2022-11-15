@@ -113,7 +113,7 @@ class Dashboard extends React.Component {
     return (
       <Flex>
         {/* SIDENAV */}
-        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID} investLink={`/invest?cID=${this.state.cID}`} />
+        <Sidenav dashboardLink={"/dashboard?cID=" + this.state.cID} investLink={`/invest?cID=${this.state.cID}`} financialLink={"/financialNews?cID=" + this.state.cID} />
 
         {/* MAIN DASHBOARD FLEX */}
         <Flex flexDir="column" ml={10} mt={10}>
@@ -189,7 +189,7 @@ class Dashboard extends React.Component {
                   <FormLabel>PIN</FormLabel>
                   <Input
                     bg="white"
-                    type="number"
+                    type="password"
                     onChange={(e) => handleChange(e, "pin")}
                   />
                 </FormControl>
