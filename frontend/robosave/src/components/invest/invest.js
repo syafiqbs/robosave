@@ -71,7 +71,7 @@ class Invest extends React.Component {
     const today = new Date().getDate()
     console.log("Today's dd: " + today)
 
-    let dateToInvest = 14
+    let dateToInvest = 30
     if (Number(today) == dateToInvest) {
       this.setState({notToday: false})
     } else {
